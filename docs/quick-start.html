@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manual Quick Start Guide – SNO on PowerVM | ocp4-ai-power</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.6;
+    }
+    header {
+      background: linear-gradient(135deg, #1565c0 0%, #1e88e5 60%, #42a5f5 100%);
+      color: #fff;
+      padding: 48px 24px 36px;
+      text-align: center;
+    }
+    header h1 { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 10px; }
+    header p.subtitle { font-size: 1.1rem; opacity: 0.9; }
+    header .badge {
+      display: inline-block; margin-top: 14px;
+      background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 20px; padding: 4px 16px; font-size: 0.82rem; letter-spacing: 0.5px;
+    }
+    nav {
+      background: #1565c0; display: flex; gap: 4px;
+      padding: 0 24px; overflow-x: auto;
+    }
+    nav a {
+      color: rgba(255,255,255,0.8); text-decoration: none;
+      padding: 12px 20px; font-size: 0.9rem; font-weight: 500;
+      white-space: nowrap; border-bottom: 3px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    nav a:hover { color: #fff; border-bottom-color: #fff; }
+    main { max-width: 900px; margin: 36px auto; padding: 0 20px 60px; }
+    .callout {
+      border-left: 4px solid; border-radius: 6px;
+      padding: 14px 18px; margin: 20px 0; font-size: 0.95rem;
+    }
+    .callout.info  { background: #e3f2fd; border-color: #1e88e5; color: #0d47a1; }
+    .callout.warn  { background: #fff8e1; border-color: #f9a825; color: #5d4037; }
+    .callout.ok    { background: #e8f5e9; border-color: #43a047; color: #1b5e20; }
+    .callout strong { font-weight: 700; }
+    .section-card {
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 28px; overflow: hidden;
+    }
+    .card-body { padding: 28px 32px; }
+    .step-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+    .step-num {
+      flex-shrink: 0; width: 42px; height: 42px;
+      background: #1e88e5; color: #fff; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; font-weight: 800;
+    }
+    .step-header h2 { font-size: 1.35rem; font-weight: 700; color: #1565c0; }
+    .card-body h3 {
+      font-size: 1.05rem; font-weight: 700; color: #1565c0;
+      margin: 22px 0 8px; border-bottom: 1px solid #e3f2fd; padding-bottom: 4px;
+    }
+    .card-body h3:first-of-type { margin-top: 0; }
+    .card-body p { margin-bottom: 10px; }
+    .card-body ul, .card-body ol { padding-left: 22px; margin-bottom: 10px; }
+    .card-body li { margin-bottom: 4px; }
+    .hw-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.93rem; }
+    .hw-table th { background: #1e88e5; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; }
+    .hw-table td { padding: 9px 14px; border-bottom: 1px solid #e0e0e0; }
+    .hw-table tr:nth-child(even) td { background: #f5f9ff; }
+    .hw-table tr:last-child td { border-bottom: none; }
+    pre {
+      background: #1e2a38; color: #e2e8f0; border-radius: 8px;
+      padding: 18px 20px; overflow-x: auto; font-size: 0.85rem;
+      line-height: 1.6; margin: 12px 0;
+    }
+    pre code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; }
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      background: #e8f0fe; color: #1a56db;
+      padding: 2px 6px; border-radius: 4px; font-size: 0.88em;
+    }
+    pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: inherit; }
+    .cm  { color: #7ec8a4; }
+    .ph  { color: #ffd580; }
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 14px 0; }
+    .svc {
+      background: #e3f2fd; border: 1px solid #90caf9;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 0.88rem; font-weight: 600; color: #0d47a1;
+    }
+    .svc span { display: block; font-weight: 400; color: #546e7a; font-size: 0.8rem; margin-top: 2px; }
+    .sv-box {
+      background: #f8f9fa; border: 1px solid #dee2e6;
+      border-radius: 8px; padding: 14px 18px; margin: 14px 0; font-size: 0.88rem;
+    }
+    .sv-box table { width: 100%; border-collapse: collapse; }
+    .sv-box td { padding: 4px 8px; }
+    .sv-box td:first-child { font-weight: 600; color: #546e7a; width: 200px; }
+    .progress-bar { display: flex; align-items: flex-start; margin: 0 0 32px; overflow-x: auto; padding: 4px 0; }
+    .ps { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 80px; position: relative; }
+    .ps::after {
+      content: ''; position: absolute; top: 16px; left: 50%;
+      width: 100%; height: 2px; background: #90caf9; z-index: 0;
+    }
+    .ps:last-child::after { display: none; }
+    .pd {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #1e88e5; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700; z-index: 1; position: relative;
+    }
+    .pl { font-size: 0.72rem; color: #546e7a; text-align: center; margin-top: 6px; max-width: 80px; }
+    footer {
+      text-align: center; padding: 24px; font-size: 0.85rem;
+      color: #78909c; border-top: 1px solid #e0e0e0; background: #fff;
+    }
+    footer a { color: #1e88e5; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    a { color: #1e88e5; }
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.7rem; }
+      .card-body { padding: 20px 18px; }
+      .step-header h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Manual Quick Start Guide</h1>
+  <p class="subtitle">Single Node OpenShift (SNO) Installation on PowerVM &ndash; Step-by-Step</p>
+  <div class="badge">ocp4-ai-power &nbsp;&middot;&nbsp; ppc64le &nbsp;&middot;&nbsp; PXE / netboot &nbsp;&middot;&nbsp; Manual</div>
+</header>
+
+<nav>
+  <a href="#prereqs">Prerequisites</a>
+  <a href="#bastion">Bastion Setup</a>
+  <a href="#dnsmasq">dnsmasq Config</a>
+  <a href="#pxe">PXE Setup</a>
+  <a href="#rhcos">RHCOS Images</a>
+  <a href="#ignition">Ignition Config</a>
+  <a href="#netboot">Network Boot</a>
+  <a href="#monitor">Monitor</a>
+  <a href="#access">Cluster Access</a>
+</nav>
+
+<main>
+
+  <div class="callout warn">
+    <strong>&#9881; Looking for the automated guide?</strong> This is the <strong>manual step-by-step</strong> guide. If you prefer to use the Ansible automation included in this repository, see the <a href="quick-start-automated.html"><strong>Automated Quick Start Guide</strong></a>.
+  </div>
+
+  <div class="callout info">
+    <strong>About this guide:</strong> This quickstart walks you through <em>manually</em> installing a Single Node OpenShift (SNO) cluster on a PowerVM LPAR using the PXE/netboot method. Each configuration step is explained in detail. A bastion host serves DNS, DHCP, HTTP, and TFTP. The SNO node boots from the network, downloads the ignition config, and installs RHCOS automatically.
+  </div>
+
+  <!-- Progress overview -->
+  <div class="progress-bar">
+    <div class="ps"><div class="pd">1</div><div class="pl">Clone & Prepare</div></div>
+    <div class="ps"><div class="pd">2</div><div class="pl">Install Packages</div></div>
+    <div class="ps"><div class="pd">3</div><div class="pl">Configure dnsmasq</div></div>
+    <div class="ps"><div class="pd">4</div><div class="pl">PXE GRUB</div></div>
+    <div class="ps"><div class="pd">5</div><div class="pl">Download RHCOS</div></div>
+    <div class="ps"><div class="pd">6</div><div class="pl">Create Ignition</div></div>
+    <div class="ps"><div class="pd">7</div><div class="pl">Network Boot</div></div>
+    <div class="ps"><div class="pd">8</div><div class="pl">Monitor</div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       PREREQUISITES
+  ═══════════════════════════════════════════════════════ -->
+  <div id="prereqs" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">&#9432;</div>
+        <h2>Prerequisites & Hardware Requirements</h2>
+      </div>
+
+      <p>You need two VMs (LPARs): one <strong>bastion</strong> host and one <strong>SNO</strong> node. Both must have internet access and static IP addresses assigned before starting.</p>
+
+      <table class="hw-table">
+        <thead>
+          <tr><th>VM / LPAR</th><th>vCPU</th><th>Memory</th><th>Storage</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Bastion</strong></td><td>2</td><td>8 GB</td><td>50 GB</td>
+            <td>RHEL 8/9 or CentOS; must run as root</td>
+          </tr>
+          <tr>
+            <td><strong>SNO Node</strong></td><td>8</td><td>16 GB</td><td>120 GB</td>
+            <td>Static IP; PXE-bootable NIC</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Required Access & Accounts</h3>
+      <ul>
+        <li>Root access on the bastion host</li>
+        <li>HMC access (for <code>lpar_netboot</code>) or SMS console access on the SNO LPAR</li>
+        <li>Red Hat pull secret &ndash; download from <a href="https://cloud.redhat.com/openshift/install" target="_blank">cloud.redhat.com</a></li>
+        <li>Internet access from both VMs (or a configured mirror registry)</li>
+      </ul>
+
+      <h3>Services Configured on Bastion</h3>
+      <div class="services-grid">
+        <div class="svc">DNS<span>via dnsmasq</span></div>
+        <div class="svc">DHCP<span>via dnsmasq</span></div>
+        <div class="svc">TFTP / PXE<span>via dnsmasq</span></div>
+        <div class="svc">HTTP<span>via httpd (port 8000)</span></div>
+      </div>
+
+      <div class="callout warn">
+        <strong>Important:</strong> The bastion's SELinux must be set to <code>permissive</code> mode. Edit <code>/etc/selinux/config</code>, set <code>SELINUX=permissive</code>, then reboot the bastion before proceeding.
+      </div>
+
+      <h3>Sample Network Values Used in This Guide</h3>
+      <div class="sv-box">
+        <table>
+          <tr><td>SNO node IP</td><td><code>9.47.87.82</code></td></tr>
+          <tr><td>Bastion IP</td><td><code>9.47.87.83</code></td></tr>
+          <tr><td>Gateway</td><td><code>9.47.95.254</code></td></tr>
+          <tr><td>Netmask</td><td><code>255.255.240.0</code></td></tr>
+          <tr><td>Domain</td><td><code>ocp.io</code></td></tr>
+          <tr><td>Cluster ID</td><td><code>sno</code></td></tr>
+          <tr><td>SNO MAC address</td><td><code>fa:b0:45:27:43:20</code></td></tr>
+          <tr><td>Machine network CIDR</td><td><code>9.47.80.0/20</code></td></tr>
+        </table>
+        <p style="margin-top:8px;font-size:0.82rem;color:#78909c;">Replace these values with your actual network configuration throughout this guide.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 1 – Clone & Prepare
+  ═══════════════════════════════════════════════════════ -->
+  <div id="bastion" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">1</div>
+        <h2>Clone the Repository & Prepare the Bastion</h2>
+      </div>
+
+      <p>Clone the <code>ocp4-ai-power</code> repository to your bastion host:</p>
+      <pre><code>git clone https://github.com/ocp-power-automation/ocp4-ai-power.git
+cd ocp4-ai-power</code></pre>
+
+      <h3>Generate SSH Key</h3>
+      <p>Create the SSH key that will be used for OCP installation:</p>
+      <pre><code>ssh-keygen -t rsa -b 2048 -N '' -C 'BASTION-SSHKEY' -f ~/.ssh/id_rsa</code></pre>
+
+      <h3>Save Pull Secret</h3>
+      <p>Download your pull secret from <a href="https://cloud.redhat.com/openshift/install" target="_blank">cloud.redhat.com</a> and save it on the bastion:</p>
+      <pre><code>mkdir -p ~/.openshift
+<span class="cm"># Paste your pull secret content into this file</span>
+vi ~/.openshift/pull-secret</code></pre>
+
+      <h3>Setup Passwordless SSH to HMC</h3>
+      <p>Configure passwordless access from the bastion to your HMC (required for <code>lpar_netboot</code>):</p>
+      <pre><code><span class="cm"># Replace <hscroot> with your HMC user and <hmc_ip> with your HMC IP</span>
+ssh <span class="ph"><hscroot></span>@<span class="ph"><hmc_ip></span>
+mkauthkeys -a "$(cat ~/.ssh/id_rsa.pub)"</code></pre>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 2 – Install Packages
+  ═══════════════════════════════════════════════════════ -->
+  <div class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">2</div>
+        <h2>Install Required Packages on Bastion</h2>
+      </div>
+
+      <p>All commands in this step are bundled in the <code>prepare-bastion.sh</code> script included in this repository. Run it directly on the bastion as root:</p>
+      <pre><code>sudo bash prepare-bastion.sh</code></pre>
+
+      <div class="callout info">
+        <strong>Or follow the manual steps below</strong> if you prefer to run each command individually.
+      </div>
+
+      <p>Manual steps &ndash; run the following on the bastion (supports RHEL 8/9 and CentOS 8/9):</p>
+      <pre><code><span class="cm"># Detect OS and install Ansible</span>
+DISTRO=$(lsb_release -ds 2>/dev/null || cat /etc/*release 2>/dev/null | head -n1 || echo "")
+OS_VERSION=$(lsb_release -rs 2>/dev/null || grep "VERSION_ID" /etc/*release 2>/dev/null \
+  | awk -F= '{print $2}' | tr -d '"' || echo "")
+
+if [[ "$DISTRO" != *CentOS* ]]; then
+  <span class="cm"># Red Hat</span>
+  if [[ $(cat /etc/redhat-release | sed 's/[^0-9.]*//g') > 8.5 ]]; then
+    sudo subscription-manager repos --enable codeready-builder-for-rhel-9-ppc64le-rpms
+    sudo yum install -y ansible-core
+  else
+    sudo subscription-manager repos --enable ansible-2.9-for-rhel-8-ppc64le-rpms
+    sudo yum install -y ansible
+  fi
+else
+  <span class="cm"># CentOS</span>
+  if [[ $OS_VERSION != "8"* ]]; then
+    sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+    sudo yum install -y ansible-core
+  else
+    sudo yum install -y epel-release epel-next-release
+    sudo yum config-manager --set-enabled powertools
+    sudo yum install -y ansible
+  fi
+fi
+
+<span class="cm"># Install required Ansible collections</span>
+sudo ansible-galaxy collection install community.crypto --upgrade
+sudo ansible-galaxy collection install community.general --upgrade
+sudo ansible-galaxy collection install ansible.posix --upgrade
+sudo ansible-galaxy collection install kubernetes.core --upgrade
+
+<span class="cm"># Install required system packages</span>
+sudo yum install -y wget jq git net-tools vim tar unzip python3 python3-pip \
+  python3-jmespath coreos-installer grub2-tools-extra bind-utils
+
+<span class="cm"># Create PXE TFTP directory structure</span>
+sudo grub2-mknetdir --net-directory=/var/lib/tftpboot</code></pre>
+
+      <div class="callout info">
+        <strong>Note:</strong> The <code>grub2-mknetdir</code> command creates the PowerPC GRUB2 network boot files under <code>/var/lib/tftpboot/boot/grub2/powerpc-ieee1275/</code>.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 3 – Configure dnsmasq
+  ═══════════════════════════════════════════════════════ -->
+  <div id="dnsmasq" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">3</div>
+        <h2>Configure dnsmasq (DNS / DHCP / PXE)</h2>
+      </div>
+
+      <p>Install <code>dnsmasq</code> to provide DNS, DHCP, and PXE services for the SNO node:</p>
+      <pre><code>sudo yum install -y dnsmasq</code></pre>
+
+      <h3>Create <code>/etc/dnsmasq.conf</code></h3>
+      <pre><code><span class="cm">##################################
+# DNS
+##################################</span>
+bogus-priv
+enable-ra
+bind-dynamic
+no-hosts
+expand-hosts
+
+interface=<span class="ph"><bastion_interface></span>        <span class="cm"># e.g. env32</span>
+domain=sno.ocp.io
+local=/sno.ocp.io/
+address=/apps.sno.ocp.io/9.47.87.82  <span class="cm"># SNO node IP</span>
+server=9.9.9.9
+
+addn-hosts=/etc/dnsmasq.d/addnhosts
+
+<span class="cm">##################################
+# DHCP
+##################################</span>
+dhcp-ignore=tag:!known
+dhcp-leasefile=/var/lib/dnsmasq/dnsmasq.leases
+
+dhcp-range=9.47.87.82,static
+
+dhcp-option=option:router,9.47.95.254
+dhcp-option=option:netmask,255.255.240.0
+dhcp-option=option:dns-server,9.47.87.83  <span class="cm"># Bastion IP</span>
+
+dhcp-host=fa:b0:45:27:43:20,sno-82,9.47.87.82,infinite
+
+<span class="cm">###############################
+# PXE
+###############################</span>
+enable-tftp
+tftp-root=/var/lib/tftpboot
+dhcp-boot=boot/grub2/powerpc-ieee1275/core.elf</code></pre>
+
+      <h3>Create <code>/etc/dnsmasq.d/addnhosts</code></h3>
+      <pre><code>9.47.87.82 sno-82 api api-int</code></pre>
+
+      <h3>Enable and Start dnsmasq</h3>
+      <pre><code>sudo systemctl enable --now dnsmasq
+sudo systemctl status dnsmasq</code></pre>
+
+      <div class="callout warn">
+        <strong>Tip:</strong> Replace all IP addresses, MAC address, and interface name with your actual values. The <code>interface=</code> line must match the bastion's network interface name (e.g. <code>env32</code>, <code>eth0</code>).
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 4 – PXE GRUB Config
+  ═══════════════════════════════════════════════════════ -->
+  <div id="pxe" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">4</div>
+        <h2>Configure PXE GRUB Boot Menu</h2>
+      </div>
+
+      <p>Create the GRUB configuration file that tells the SNO node how to boot RHCOS and load the ignition config.</p>
+
+      <h3>Create <code>/var/lib/tftpboot/boot/grub2/grub.cfg</code></h3>
+      <pre><code>default=0
+fallback=1
+timeout=1
+
+if [ ${net_default_mac} == fa:b0:45:27:43:20 ]; then
+default=0
+fallback=1
+timeout=1
+menuentry "CoreOS (BIOS)" {
+   echo "Loading kernel"
+   linux "/rhcos/kernel" ip=dhcp rd.neednet=1 \
+     ignition.platform.id=metal ignition.firstboot \
+     coreos.live.rootfs_url=http://9.47.87.83:8000/install/rootfs.img \
+     ignition.config.url=http://9.47.87.83:8000/ignition/sno.ign
+
+   echo "Loading initrd"
+   initrd  "/rhcos/initramfs.img"
+}
+fi</code></pre>
+
+      <div class="callout info">
+        <strong>Note:</strong> Replace <code>fa:b0:45:27:43:20</code> with the actual MAC address of your SNO LPAR's NIC, and <code>9.47.87.83</code> with your bastion's IP address.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 5 – Download RHCOS Images
+  ═══════════════════════════════════════════════════════ -->
+  <div id="rhcos" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">5</div>
+        <h2>Download RHCOS Images & Setup httpd</h2>
+      </div>
+
+      <p>Download the RHCOS kernel, initramfs, and rootfs images for ppc64le. These are served to the SNO node during PXE boot.</p>
+
+      <pre><code><span class="cm"># Set the RHCOS base URL (adjust version to match your target OCP version)</span>
+export RHCOS_URL=https://mirror.openshift.com/pub/openshift-v4/ppc64le/dependencies/rhcos/4.12/latest/
+
+<span class="cm"># Create required directories</span>
+sudo mkdir -p /var/lib/tftpboot/rhcos
+sudo mkdir -p /var/www/html/install
+sudo mkdir -p /var/www/html/ignition
+
+<span class="cm"># Download PXE kernel and initramfs (served via TFTP)</span>
+cd /var/lib/tftpboot/rhcos
+sudo wget ${RHCOS_URL}/rhcos-live-kernel-ppc64le -O kernel
+sudo wget ${RHCOS_URL}/rhcos-live-initramfs.ppc64le.img -O initramfs.img
+
+<span class="cm"># Download rootfs image (served via HTTP)</span>
+cd /var/www/html/install
+sudo wget ${RHCOS_URL}/rhcos-live-rootfs.ppc64le.img -O rootfs.img</code></pre>
+
+      <div class="callout info">
+        <strong>Version:</strong> Check the latest available RHCOS version for ppc64le at
+        <a href="https://mirror.openshift.com/pub/openshift-v4/ppc64le/dependencies/rhcos/" target="_blank">mirror.openshift.com</a>.
+        Match the RHCOS version to your target OpenShift version.
+      </div>
+
+      <h3>Install and Configure httpd</h3>
+      <p>Install Apache httpd to serve the rootfs and ignition files on port 8000:</p>
+      <pre><code>sudo yum install -y httpd
+
+<span class="cm"># Configure httpd to listen on port 8000</span>
+sudo sed -i 's/^Listen 80$/Listen 8000/' /etc/httpd/conf/httpd.conf
+
+<span class="cm"># Fix SELinux context on web root</span>
+sudo restorecon -vR /var/www/html || true
+
+sudo systemctl enable --now httpd</code></pre>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 6 – Create Ignition Config
+  ═══════════════════════════════════════════════════════ -->
+  <div id="ignition" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">6</div>
+        <h2>Create the SNO Ignition Configuration</h2>
+      </div>
+
+      <h3>Download openshift-install</h3>
+      <pre><code><span class="cm"># Download the openshift-install binary for ppc64le (adjust version as needed)</span>
+wget https://mirror.openshift.com/pub/openshift-v4/ppc64le/clients/ocp/4.12.0/openshift-install-linux-4.12.0.tar.gz
+tar xzvf openshift-install-linux-4.12.0.tar.gz</code></pre>
+
+      <h3>Create the Work Directory</h3>
+      <pre><code>mkdir -p ~/sno-work
+cd ~/sno-work</code></pre>
+
+      <h3>Create <code>~/sno-work/install-config.yaml</code></h3>
+      <pre><code>apiVersion: v1
+baseDomain: <span class="ph"><domain></span>                  <span class="cm"># e.g. ocp.io</span>
+compute:
+- name: worker
+  replicas: 0                        <span class="cm"># No workers for SNO</span>
+controlPlane:
+  name: master
+  replicas: 1                        <span class="cm"># Single control plane node</span>
+metadata:
+  name: <span class="ph"><cluster_id></span>               <span class="cm"># e.g. sno</span>
+networking:
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  machineNetwork:
+  - cidr: <span class="ph"><machine_network_cidr></span>     <span class="cm"># e.g. 9.47.80.0/20</span>
+  networkType: OVNKubernetes
+  serviceNetwork:
+  - 172.30.0.0/16
+platform:
+  none: {}
+bootstrapInPlace:
+  installationDisk: <span class="ph"><device></span>          <span class="cm"># e.g. /dev/sda</span>
+pullSecret: '<span class="ph"><pull_secret></span>'
+sshKey: |
+  <span class="ph"><ssh_public_key></span></code></pre>
+
+      <div class="callout warn">
+        <strong>Configuration Notes:</strong>
+        <ul style="margin-top:8px;padding-left:20px;">
+          <li><code><domain></code> &ndash; Base domain, e.g. <code>ocp.io</code></li>
+          <li><code><cluster_id></code> &ndash; Cluster name, e.g. <code>sno</code>. Full domain will be <code>sno.ocp.io</code></li>
+          <li><code><machine_network_cidr></code> &ndash; Subnet containing your SNO node's IP, e.g. <code>9.47.80.0/20</code></li>
+          <li><code><device></code> &ndash; Installation disk, e.g. <code>/dev/sda</code> or <code>/dev/disk/by-id/scsi-36005076d0281005ef000000000026803</code></li>
+          <li><code><pull_secret></code> &ndash; Contents of <code>~/.openshift/pull-secret</code></li>
+          <li><code><ssh_public_key></code> &ndash; Contents of <code>~/.ssh/id_rsa.pub</code></li>
+        </ul>
+      </div>
+
+      <h3>Generate the Ignition File</h3>
+      <pre><code><span class="cm"># Generate the single-node ignition config</span>
+./openshift-install --dir=~/sno-work create single-node-ignition-config
+
+<span class="cm"># Copy the ignition file to the HTTP server directory</span>
+sudo cp ~/sno-work/single-node-ignition-config.ign /var/www/html/ignition/sno.ign
+sudo restorecon -vR /var/www/html || true</code></pre>
+
+      <div class="callout ok">
+        <strong>Ready!</strong> Verify the HTTP server is accessible before proceeding:
+        <pre style="margin-top:8px;"><code>curl http://9.47.87.83:8000/ignition/sno.ign | head -c 100</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 7 – Network Boot
+  ═══════════════════════════════════════════════════════ -->
+  <div id="netboot" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">7</div>
+        <h2>Network Boot the SNO Node</h2>
+      </div>
+
+      <p>There are two ways to PXE-boot the SNO LPAR on PowerVM:</p>
+
+      <h3>Option A &ndash; Using <code>lpar_netboot</code> on HMC (Recommended)</h3>
+      <p>Run the following command from the HMC command line:</p>
+      <pre><code>lpar_netboot -i -D -f -t ent \
+  -m <span class="ph"><sno_mac></span> \
+  -s auto -d auto \
+  -S <span class="ph"><server_ip></span> \
+  -C <span class="ph"><sno_ip></span> \
+  -G <span class="ph"><gateway></span> \
+  <span class="ph"><lpar_name></span> default_profile <span class="ph"><cec_name></span></code></pre>
+
+      <div class="sv-box">
+        <table>
+          <tr><td><code>-m <sno_mac></code></td><td>MAC address of the SNO LPAR's NIC &ndash; e.g. <code>fa:b0:45:27:43:20</code></td></tr>
+          <tr><td><code>-S <server_ip></code></td><td>Bastion IP address (PXE server) &ndash; e.g. <code>9.47.87.83</code></td></tr>
+          <tr><td><code>-C <sno_ip></code></td><td>SNO node IP address &ndash; e.g. <code>9.47.87.82</code></td></tr>
+          <tr><td><code>-G <gateway></code></td><td>Network gateway &ndash; e.g. <code>9.47.95.254</code></td></tr>
+          <tr><td><code><lpar_name></code></td><td>Name of the SNO LPAR in HMC</td></tr>
+          <tr><td><code><cec_name></code></td><td>Name of the CEC/system hosting the LPAR</td></tr>
+        </table>
+      </div>
+
+      <h3>Option B &ndash; Using SMS Console (Interactive)</h3>
+      <p>Access the LPAR's SMS (System Management Services) console and manually select the network boot device. Refer to the HMC documentation for detailed SMS navigation steps.</p>
+
+      <div class="callout info">
+        <strong>What happens next:</strong> The SNO LPAR boots from the network, downloads the RHCOS kernel and initramfs via TFTP, then fetches the rootfs and ignition config via HTTP from the bastion. RHCOS is written to the installation disk and the node reboots automatically to complete the OpenShift installation.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 8 – Monitor Installation
+  ═══════════════════════════════════════════════════════ -->
+  <div id="monitor" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">8</div>
+        <h2>Monitor Installation Progress</h2>
+      </div>
+
+      <p>After the SNO LPAR boots from PXE, monitor the installation from the bastion using <code>openshift-install</code>:</p>
+
+      <pre><code><span class="cm"># Step 1: Wait for bootstrap to complete (typically 15-20 minutes)</span>
+cd ~/sno-work
+./openshift-install wait-for bootstrap-complete --log-level=info
+
+<span class="cm"># Step 2: After bootstrap completes, wait for full installation</span>
+./openshift-install wait-for install-complete --log-level=info</code></pre>
+
+      <div class="callout info">
+        <strong>Expected duration:</strong> The full SNO installation typically takes <strong>45&ndash;90 minutes</strong> depending on hardware and network speed.
+      </div>
+
+      <h3>Check Status with <code>oc</code></h3>
+      <p>You can also monitor progress using the OpenShift CLI:</p>
+      <pre><code><span class="cm"># Set kubeconfig</span>
+export KUBECONFIG=~/sno-work/auth/kubeconfig
+
+<span class="cm"># Check node status</span>
+oc get nodes
+
+<span class="cm"># Check overall cluster version / installation progress</span>
+oc get clusterversion
+
+<span class="cm"># Check cluster operators (all should be Available=True when done)</span>
+oc get co
+
+<span class="cm"># Check pod status across all namespaces</span>
+oc get pod -A</code></pre>
+
+      <div class="callout ok">
+        <strong>Installation complete</strong> when <code>oc get clusterversion</code> shows <code>Progressing=False</code> and <code>Available=True</code>, and all cluster operators report <code>Available=True</code>.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       CLUSTER ACCESS
+  ═══════════════════════════════════════════════════════ -->
+  <div id="access" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">&#10003;</div>
+        <h2>Cluster Access</h2>
+      </div>
+
+      <p>After a successful installation, cluster credentials are stored in <code>~/sno-work/auth/</code>:</p>
+      <ul>
+        <li><code>kubeconfig</code> &ndash; kubeconfig file for CLI access</li>
+        <li><code>kubeadmin-password</code> &ndash; password for the <code>kubeadmin</code> user</li>
+      </ul>
+
+      <h3>CLI Access</h3>
+      <pre><code><span class="cm"># Set kubeconfig</span>
+export KUBECONFIG=~/sno-work/auth/kubeconfig
+
+<span class="cm"># Or login with kubeadmin credentials</span>
+oc login https://api.sno.ocp.io:6443 \
+  -u kubeadmin \
+  -p $(cat ~/sno-work/auth/kubeadmin-password)
+
+<span class="cm"># Verify cluster info</span>
+oc cluster-info
+oc get nodes</code></pre>
+
+      <h3>Web Console</h3>
+      <p>Open the following URL in your browser and login with user <code>kubeadmin</code>:</p>
+      <pre><code>https://console-openshift-console.apps.<span class="ph"><cluster_id></span>.<span class="ph"><domain></span>
+<span class="cm"># Example: https://console-openshift-console.apps.sno.ocp.io</span></code></pre>
+
+      <h3>Download oc CLI</h3>
+      <ul>
+        <li><a href="https://mirror.openshift.com/pub/openshift-v4/ppc64le/clients/ocp/stable/openshift-client-linux.tar.gz" target="_blank">Linux (ppc64le)</a></li>
+        <li><a href="https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz" target="_blank">Linux (x86_64)</a></li>
+        <li><a href="https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-mac.tar.gz" target="_blank">Mac OSX</a></li>
+        <li><a href="https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-windows.zip" target="_blank">Windows</a></li>
+      </ul>
+
+      <div class="callout warn">
+        <strong>Security:</strong> Store the cluster credentials securely. Consider removing <code>kubeadmin-password</code> from the bastion after saving it to a secure location.
+      </div>
+    </div>
+  </div>
+
+  <!-- Further reading -->
+  <div class="callout info">
+    <strong>Further Reading:</strong>
+    &nbsp;<a href="ansible-bastion/docs/SNO.md">Full SNO Installation Guide</a>
+    &nbsp;&middot;&nbsp;
+    <a href="ansible-bastion/docs/AgentBasedInstaller.md">Agent-based Installer Guide</a>
+    &nbsp;&middot;&nbsp;
+    <a href="ansible-bastion/docs/AssistedInstaller.md">Assisted Installer Guide</a>
+    &nbsp;&middot;&nbsp;
+    <a href="https://docs.openshift.com/container-platform/latest/installing/installing_sno/install-sno-installing-sno.html" target="_blank">Red Hat SNO Documentation</a>
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    <a href="https://github.com/ocp-power-automation/ocp4-ai-power" target="_blank">ocp4-ai-power</a>
+    &nbsp;&middot;&nbsp;
+    OpenShift on PowerVM &nbsp;&middot;&nbsp;
+    <a href="https://github.com/ocp-power-automation/ocp4-ai-power/issues" target="_blank">Report an Issue</a>
+  </p>
+</footer>
+
+</body>
+</html>

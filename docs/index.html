@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ocp4-ai-power – Documentation</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: linear-gradient(135deg, #1565c0 0%, #1e88e5 60%, #42a5f5 100%);
+      color: #fff;
+      padding: 56px 24px 44px;
+      text-align: center;
+    }
+    header h1 { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; }
+    header p.subtitle { font-size: 1.15rem; opacity: 0.9; max-width: 640px; margin: 0 auto; }
+    header .badges { margin-top: 18px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 20px; padding: 4px 16px; font-size: 0.82rem; letter-spacing: 0.5px;
+    }
+    main {
+      max-width: 860px; margin: 48px auto; padding: 0 20px 60px;
+      flex: 1;
+    }
+    h2 {
+      font-size: 1.5rem; font-weight: 700; color: #1565c0;
+      margin-bottom: 20px; padding-bottom: 8px;
+      border-bottom: 2px solid #e3f2fd;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .card {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.09);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: box-shadow 0.2s, transform 0.2s;
+      text-decoration: none; color: inherit;
+    }
+    .card:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.14);
+      transform: translateY(-2px);
+    }
+    .card-accent { height: 6px; }
+    .card-accent.blue  { background: linear-gradient(90deg, #1565c0, #42a5f5); }
+    .card-accent.green { background: linear-gradient(90deg, #1b5e20, #43a047); }
+    .card-accent.gray  { background: linear-gradient(90deg, #455a64, #90a4ae); }
+    .card-body { padding: 24px 26px; flex: 1; }
+    .card-icon { font-size: 2rem; margin-bottom: 10px; }
+    .card-body h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+    .card-body h3.blue  { color: #1565c0; }
+    .card-body h3.green { color: #1b5e20; }
+    .card-body h3.gray  { color: #455a64; }
+    .card-body p { font-size: 0.93rem; color: #546e7a; margin-bottom: 12px; }
+    .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .tag {
+      background: #e3f2fd; color: #1565c0;
+      border-radius: 12px; padding: 2px 10px; font-size: 0.78rem; font-weight: 600;
+    }
+    .tag.green { background: #e8f5e9; color: #1b5e20; }
+    .tag.gray  { background: #eceff1; color: #455a64; }
+    .card-footer {
+      padding: 14px 26px;
+      background: #f8f9fa;
+      border-top: 1px solid #e0e0e0;
+      font-size: 0.85rem; font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .card-footer.blue  { color: #1565c0; }
+    .card-footer.green { color: #1b5e20; }
+    .card-footer.gray  { color: #455a64; }
+    .section-title { margin: 36px 0 16px; }
+    .callout {
+      border-left: 4px solid #1e88e5;
+      background: #e3f2fd; color: #0d47a1;
+      border-radius: 6px; padding: 14px 18px;
+      margin: 24px 0; font-size: 0.95rem;
+    }
+    .callout strong { font-weight: 700; }
+    footer {
+      text-align: center; padding: 24px;
+      font-size: 0.85rem; color: #78909c;
+      border-top: 1px solid #e0e0e0; background: #fff;
+    }
+    footer a { color: #1e88e5; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.8rem; }
+      .cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>ocp4-ai-power</h1>
+  <p class="subtitle">OpenShift Container Platform 4.x on PowerVM &mdash; Agent-based, Assisted Installer & SNO automation</p>
+  <div class="badges">
+    <span class="badge">ppc64le</span>
+    <span class="badge">PowerVC</span>
+    <span class="badge">PowerVS</span>
+    <span class="badge">HMC</span>
+    <span class="badge">Ansible + Terraform</span>
+  </div>
+</header>
+
+<main>
+
+  <div class="callout">
+    <strong>Getting started?</strong> Choose a quickstart guide below based on your preferred installation method. The automated guide is recommended for most users.
+  </div>
+
+  <!-- SNO Quickstart Guides -->
+  <h2 class="section-title">&#9889; SNO Quick Start Guides</h2>
+  <div class="cards">
+
+    <a href="quick-start-automated.html" class="card">
+      <div class="card-accent green"></div>
+      <div class="card-body">
+        <div class="card-icon">&#9881;</div>
+        <h3 class="green">Automated Quick Start</h3>
+        <p>Install SNO using the Ansible automation built into this repository. Recommended for most users &mdash; a single playbook command handles everything.</p>
+        <div class="card-tags">
+          <span class="tag green">Ansible</span>
+          <span class="tag green">Automated</span>
+          <span class="tag green">SNO</span>
+          <span class="tag green">Recommended</span>
+        </div>
+      </div>
+      <div class="card-footer green">&#8594; View Automated Guide</div>
+    </a>
+
+    <a href="quick-start.html" class="card">
+      <div class="card-accent blue"></div>
+      <div class="card-body">
+        <div class="card-icon">&#128196;</div>
+        <h3 class="blue">Manual Step-by-Step Quick Start</h3>
+        <p>Manually configure each service (dnsmasq, httpd, PXE, ignition). Useful for learning the internals or for custom environments.</p>
+        <div class="card-tags">
+          <span class="tag">Manual</span>
+          <span class="tag">PXE / netboot</span>
+          <span class="tag">SNO</span>
+        </div>
+      </div>
+      <div class="card-footer blue">&#8594; View Manual Guide</div>
+    </a>
+
+  </div>
+
+  <!-- Other Documentation -->
+  <h2 class="section-title">&#128196; Additional Documentation</h2>
+  <div class="cards">
+
+    <a href="https://github.com/danijel-soldo/ocp4-ai-power/blob/main/ansible-bastion/docs/AgentBasedInstaller.md" target="_blank" class="card">
+      <div class="card-accent gray"></div>
+      <div class="card-body">
+        <div class="card-icon">&#128640;</div>
+        <h3 class="gray">Agent-based Installer Guide</h3>
+        <p>Install an HA OpenShift cluster using the OpenShift Agent-based installer (OCP 4.15+).</p>
+        <div class="card-tags">
+          <span class="tag gray">Agent-based</span>
+          <span class="tag gray">HA Cluster</span>
+        </div>
+      </div>
+      <div class="card-footer gray">&#8594; View on GitHub</div>
+    </a>
+
+    <a href="https://github.com/danijel-soldo/ocp4-ai-power/blob/main/ansible-bastion/docs/AssistedInstaller.md" target="_blank" class="card">
+      <div class="card-accent gray"></div>
+      <div class="card-body">
+        <div class="card-icon">&#127760;</div>
+        <h3 class="gray">Assisted Installer Guide</h3>
+        <p>Install OpenShift using Red Hat's Assisted Installer via Web UI or REST API.</p>
+        <div class="card-tags">
+          <span class="tag gray">Assisted</span>
+          <span class="tag gray">HA Cluster</span>
+        </div>
+      </div>
+      <div class="card-footer gray">&#8594; View on GitHub</div>
+    </a>
+
+    <a href="https://github.com/danijel-soldo/ocp4-ai-power/blob/main/ansible-bastion/docs/vars-doc.md" target="_blank" class="card">
+      <div class="card-accent gray"></div>
+      <div class="card-body">
+        <div class="card-icon">&#9881;</div>
+        <h3 class="gray">vars.yaml Reference</h3>
+        <p>Full documentation of all configuration variables in <code>example-vars.yaml</code>.</p>
+        <div class="card-tags">
+          <span class="tag gray">Configuration</span>
+          <span class="tag gray">Reference</span>
+        </div>
+      </div>
+      <div class="card-footer gray">&#8594; View on GitHub</div>
+    </a>
+
+    <a href="https://github.com/danijel-soldo/ocp4-ai-power/blob/main/ansible-bastion/docs/day2.md" target="_blank" class="card">
+      <div class="card-accent gray"></div>
+      <div class="card-body">
+        <div class="card-icon">&#128295;</div>
+        <h3 class="gray">Day 2 Operations</h3>
+        <p>Add worker nodes and perform post-installation customization tasks.</p>
+        <div class="card-tags">
+          <span class="tag gray">Day 2</span>
+          <span class="tag gray">Workers</span>
+        </div>
+      </div>
+      <div class="card-footer gray">&#8594; View on GitHub</div>
+    </a>
+
+  </div>
+
+  <!-- GitHub link -->
+  <div class="callout">
+    <strong>Source code:</strong> &nbsp;
+    <a href="https://github.com/danijel-soldo/ocp4-ai-power" target="_blank">github.com/danijel-soldo/ocp4-ai-power</a>
+    &nbsp;&middot;&nbsp;
+    <a href="https://github.com/danijel-soldo/ocp4-ai-power/issues" target="_blank">Report an Issue</a>
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    <a href="https://github.com/danijel-soldo/ocp4-ai-power" target="_blank">ocp4-ai-power</a>
+    &nbsp;&middot;&nbsp;
+    OpenShift on PowerVM &nbsp;&middot;&nbsp;
+    <a href="https://github.com/danijel-soldo/ocp4-ai-power/issues" target="_blank">Report an Issue</a>
+  </p>
+</footer>
+
+</body>
+</html>

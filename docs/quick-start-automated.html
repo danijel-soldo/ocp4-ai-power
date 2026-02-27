@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Automated Quick Start Guide – SNO on PowerVM | ocp4-ai-power</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.6;
+    }
+    header {
+      background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 60%, #43a047 100%);
+      color: #fff;
+      padding: 48px 24px 36px;
+      text-align: center;
+    }
+    header h1 { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 10px; }
+    header p.subtitle { font-size: 1.1rem; opacity: 0.9; }
+    header .badge {
+      display: inline-block; margin-top: 14px;
+      background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 20px; padding: 4px 16px; font-size: 0.82rem; letter-spacing: 0.5px;
+    }
+    nav {
+      background: #1b5e20; display: flex; gap: 4px;
+      padding: 0 24px; overflow-x: auto;
+    }
+    nav a {
+      color: rgba(255,255,255,0.8); text-decoration: none;
+      padding: 12px 20px; font-size: 0.9rem; font-weight: 500;
+      white-space: nowrap; border-bottom: 3px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    nav a:hover { color: #fff; border-bottom-color: #fff; }
+    main { max-width: 900px; margin: 36px auto; padding: 0 20px 60px; }
+    .callout {
+      border-left: 4px solid; border-radius: 6px;
+      padding: 14px 18px; margin: 20px 0; font-size: 0.95rem;
+    }
+    .callout.info  { background: #e3f2fd; border-color: #1e88e5; color: #0d47a1; }
+    .callout.warn  { background: #fff8e1; border-color: #f9a825; color: #5d4037; }
+    .callout.ok    { background: #e8f5e9; border-color: #43a047; color: #1b5e20; }
+    .callout strong { font-weight: 700; }
+    .section-card {
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 28px; overflow: hidden;
+    }
+    .card-body { padding: 28px 32px; }
+    .step-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+    .step-num {
+      flex-shrink: 0; width: 42px; height: 42px;
+      background: #2e7d32; color: #fff; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; font-weight: 800;
+    }
+    .step-header h2 { font-size: 1.35rem; font-weight: 700; color: #1b5e20; }
+    .card-body h3 {
+      font-size: 1.05rem; font-weight: 700; color: #2e7d32;
+      margin: 22px 0 8px; border-bottom: 1px solid #e8f5e9; padding-bottom: 4px;
+    }
+    .card-body h3:first-of-type { margin-top: 0; }
+    .card-body p { margin-bottom: 10px; }
+    .card-body ul, .card-body ol { padding-left: 22px; margin-bottom: 10px; }
+    .card-body li { margin-bottom: 4px; }
+    .hw-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.93rem; }
+    .hw-table th { background: #2e7d32; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; }
+    .hw-table td { padding: 9px 14px; border-bottom: 1px solid #e0e0e0; }
+    .hw-table tr:nth-child(even) td { background: #f1f8e9; }
+    .hw-table tr:last-child td { border-bottom: none; }
+    pre {
+      background: #1e2a38; color: #e2e8f0; border-radius: 8px;
+      padding: 18px 20px; overflow-x: auto; font-size: 0.85rem;
+      line-height: 1.6; margin: 12px 0;
+    }
+    pre code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; }
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      background: #e8f5e9; color: #1b5e20;
+      padding: 2px 6px; border-radius: 4px; font-size: 0.88em;
+    }
+    pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: inherit; }
+    .cm  { color: #7ec8a4; }
+    .ph  { color: #ffd580; }
+    .sv-box {
+      background: #f8f9fa; border: 1px solid #dee2e6;
+      border-radius: 8px; padding: 14px 18px; margin: 14px 0; font-size: 0.88rem;
+    }
+    .sv-box table { width: 100%; border-collapse: collapse; }
+    .sv-box td { padding: 4px 8px; }
+    .sv-box td:first-child { font-weight: 600; color: #546e7a; width: 220px; }
+    /* Playbook flow diagram */
+    .flow {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin: 16px 0; align-items: center;
+    }
+    .flow-step {
+      background: #e8f5e9; border: 2px solid #43a047;
+      border-radius: 8px; padding: 8px 14px;
+      font-size: 0.85rem; font-weight: 600; color: #1b5e20;
+      white-space: nowrap;
+    }
+    .flow-arrow { color: #43a047; font-size: 1.2rem; font-weight: 700; }
+    /* vars table */
+    .vars-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.88rem; }
+    .vars-table th { background: #2e7d32; color: #fff; padding: 8px 12px; text-align: left; }
+    .vars-table td { padding: 7px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
+    .vars-table tr:nth-child(even) td { background: #f1f8e9; }
+    .vars-table tr:last-child td { border-bottom: none; }
+    .vars-table td:first-child { font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.82rem; color: #1b5e20; white-space: nowrap; }
+    .vars-table .req { color: #c62828; font-weight: 700; font-size: 0.75rem; }
+    .vars-table .opt { color: #546e7a; font-size: 0.75rem; }
+    .progress-bar { display: flex; align-items: flex-start; margin: 0 0 32px; overflow-x: auto; padding: 4px 0; }
+    .ps { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 80px; position: relative; }
+    .ps::after {
+      content: ''; position: absolute; top: 16px; left: 50%;
+      width: 100%; height: 2px; background: #a5d6a7; z-index: 0;
+    }
+    .ps:last-child::after { display: none; }
+    .pd {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #2e7d32; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700; z-index: 1; position: relative;
+    }
+    .pl { font-size: 0.72rem; color: #546e7a; text-align: center; margin-top: 6px; max-width: 80px; }
+    footer {
+      text-align: center; padding: 24px; font-size: 0.85rem;
+      color: #78909c; border-top: 1px solid #e0e0e0; background: #fff;
+    }
+    footer a { color: #2e7d32; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    a { color: #2e7d32; }
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.7rem; }
+      .card-body { padding: 20px 18px; }
+      .step-header h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Automated Quick Start Guide</h1>
+  <p class="subtitle">Single Node OpenShift (SNO) Installation on PowerVM &ndash; Using Ansible Automation</p>
+  <div class="badge">ocp4-ai-power &nbsp;&middot;&nbsp; ppc64le &nbsp;&middot;&nbsp; Ansible &nbsp;&middot;&nbsp; Automated</div>
+</header>
+
+<nav>
+  <a href="#prereqs">Prerequisites</a>
+  <a href="#clone">Clone & Prepare</a>
+  <a href="#vars">Configure vars.yaml</a>
+  <a href="#run">Run Playbook</a>
+  <a href="#monitor">Monitor</a>
+  <a href="#access">Cluster Access</a>
+</nav>
+
+<main>
+
+  <div class="callout info">
+    <strong>&#9881; Manual guide available:</strong> This guide uses the <strong>Ansible automation</strong> built into this repository. If you prefer to configure each service manually, see the <a href="quick-start.html"><strong>Manual Step-by-Step Quick Start Guide</strong></a>.
+  </div>
+
+  <div class="callout ok">
+    <strong>What the automation does for you:</strong> The Ansible playbooks in <code>ansible-bastion/</code> automatically set up all required bastion services (DNS, DHCP, TFTP, HTTP, HAProxy), download RHCOS and OCP binaries, generate the SNO ignition config, trigger the network boot via HMC, and monitor the installation to completion &mdash; all from a single command.
+  </div>
+
+  <!-- Progress overview -->
+  <div class="progress-bar">
+    <div class="ps"><div class="pd">1</div><div class="pl">Clone Repo</div></div>
+    <div class="ps"><div class="pd">2</div><div class="pl">Prepare Bastion</div></div>
+    <div class="ps"><div class="pd">3</div><div class="pl">Configure vars.yaml</div></div>
+    <div class="ps"><div class="pd">4</div><div class="pl">Run Playbook</div></div>
+    <div class="ps"><div class="pd">5</div><div class="pl">Monitor</div></div>
+    <div class="ps"><div class="pd">6</div><div class="pl">Access Cluster</div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       PREREQUISITES
+  ═══════════════════════════════════════════════════════ -->
+  <div id="prereqs" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">&#9432;</div>
+        <h2>Prerequisites & Hardware Requirements</h2>
+      </div>
+
+      <p>You need two VMs (LPARs): one <strong>bastion</strong> host and one <strong>SNO</strong> node. Both must have internet access and static IP addresses assigned before starting.</p>
+
+      <table class="hw-table">
+        <thead>
+          <tr><th>VM / LPAR</th><th>vCPU</th><th>Memory</th><th>Storage</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Bastion</strong></td><td>2</td><td>8 GB</td><td>50 GB</td>
+            <td>RHEL 8/9 or CentOS; must run as root; passwordless SSH to HMC</td>
+          </tr>
+          <tr>
+            <td><strong>SNO Node</strong></td><td>8</td><td>16 GB</td><td>120 GB</td>
+            <td>Static IP; PXE-bootable NIC; HMC-managed LPAR</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Required Access & Accounts</h3>
+      <ul>
+        <li>Root access on the bastion host</li>
+        <li>Passwordless SSH from bastion to HMC (required for <code>lpar_netboot</code>)</li>
+        <li>Red Hat pull secret &ndash; download from <a href="https://cloud.redhat.com/openshift/install" target="_blank">cloud.redhat.com</a></li>
+        <li>Internet access from both VMs (or a configured mirror registry)</li>
+      </ul>
+
+      <div class="callout warn">
+        <strong>Important:</strong> The bastion's SELinux must be set to <code>permissive</code> mode. Edit <code>/etc/selinux/config</code>, set <code>SELINUX=permissive</code>, then reboot before running the playbook.
+      </div>
+
+      <h3>Ansible Playbook Flow</h3>
+      <p>The main playbook (<code>playbooks/main.yaml</code>) runs these roles in sequence:</p>
+      <div class="flow">
+        <div class="flow-step">services<br><small>DNS/DHCP/PXE/HTTP</small></div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-step">ignition<br><small>install-config + SNO ign</small></div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-step">netboot<br><small>lpar_netboot via HMC</small></div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-step">update-inventory<br><small>dynamic inventory</small></div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-step">sno-set-boot-order<br><small>disk boot after install</small></div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-step">monitor<br><small>wait for completion</small></div>
+      </div>
+      <p>You can also run each step individually using the <code>step-N-*.yaml</code> playbooks.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 1 – Clone & Prepare
+  ═══════════════════════════════════════════════════════ -->
+  <div id="clone" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">1</div>
+        <h2>Clone the Repository & Prepare the Bastion</h2>
+      </div>
+
+      <p>Clone the <code>ocp4-ai-power</code> repository to your bastion host:</p>
+      <pre><code>git clone https://github.com/ocp-power-automation/ocp4-ai-power.git
+cd ocp4-ai-power/ansible-bastion</code></pre>
+
+      <h3>Run the Bastion Preparation Script</h3>
+      <p>The <code>prepare-bastion.sh</code> script (included in the repository root) installs all required packages, Ansible, Ansible collections, and sets up the PXE TFTP directory:</p>
+      <pre><code>cd ..
+sudo bash prepare-bastion.sh
+cd ansible-bastion</code></pre>
+
+      <div class="callout info">
+        <strong>What prepare-bastion.sh does:</strong>
+        <ul style="margin-top:8px;padding-left:20px;">
+          <li>Detects OS (RHEL 8/9 or CentOS 8/9) and installs Ansible</li>
+          <li>Installs required Ansible collections (<code>community.crypto</code>, <code>community.general</code>, <code>ansible.posix</code>, <code>kubernetes.core</code>)</li>
+          <li>Installs system packages: <code>wget</code>, <code>jq</code>, <code>coreos-installer</code>, <code>grub2-tools-extra</code>, etc.</li>
+          <li>Runs <code>grub2-mknetdir</code> to create the PowerVM PXE TFTP directory</li>
+          <li>Installs and configures <code>httpd</code> on port 8000</li>
+          <li>Installs <code>dnsmasq</code></li>
+        </ul>
+      </div>
+
+      <h3>Setup Passwordless SSH to HMC</h3>
+      <p>The Ansible playbook uses <code>lpar_netboot</code> via SSH to the HMC. Configure passwordless access:</p>
+      <pre><code><span class="cm"># Generate SSH key if not already present</span>
+ssh-keygen -t rsa -b 2048 -N '' -C 'BASTION-SSHKEY' -f ~/.ssh/id_rsa
+
+<span class="cm"># Add the public key to HMC (replace <hscroot> and <hmc_ip>)</span>
+ssh <span class="ph"><hscroot></span>@<span class="ph"><hmc_ip></span>
+mkauthkeys -a "$(cat ~/.ssh/id_rsa.pub)"</code></pre>
+
+      <h3>Save Pull Secret</h3>
+      <pre><code>mkdir -p ~/.openshift
+<span class="cm"># Paste your pull secret from cloud.redhat.com</span>
+vi ~/.openshift/pull-secret</code></pre>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 2 – Configure vars.yaml
+  ═══════════════════════════════════════════════════════ -->
+  <div id="vars" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">2</div>
+        <h2>Configure <code>vars.yaml</code></h2>
+      </div>
+
+      <p>Copy the example vars file and edit it for your environment:</p>
+      <pre><code>cp example-vars.yaml vars.yaml
+vi vars.yaml</code></pre>
+
+      <div class="callout warn">
+        <strong>Important:</strong> Do NOT edit <code>example-vars.yaml</code> directly. Always work with your own copy (<code>vars.yaml</code>).
+      </div>
+
+      <h3>Key Variables for SNO Installation</h3>
+      <p>Set <code>install_type: sno</code> and configure the following variables:</p>
+
+      <table class="vars-table">
+        <thead>
+          <tr><th>Variable</th><th>Description</th><th>Required</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>install_type</td>
+            <td>Set to <code>sno</code> for Single Node OpenShift installation</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>helper.ipaddr</td>
+            <td>IP address of the bastion host</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>helper.name</td>
+            <td>Hostname for the bastion (e.g. <code>helper</code>)</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>dns.domain</td>
+            <td>Base domain for the cluster (e.g. <code>ocp.io</code>)</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>dns.clusterid</td>
+            <td>Cluster name / ID (e.g. <code>sno</code>)</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>dns.forwarder1</td>
+            <td>Upstream DNS forwarder (e.g. <code>9.9.9.9</code>)</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>dhcp.router</td>
+            <td>Default gateway for the network</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>dhcp.netmask</td>
+            <td>Network mask (e.g. <code>255.255.240.0</code>)</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>dhcp.subnet</td>
+            <td>Network subnet in CIDR (e.g. <code>9.47.80.0/20</code>)</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>masters[0].name</td>
+            <td>Hostname for the SNO node (e.g. <code>sno-82</code>)</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>masters[0].ipaddr</td>
+            <td>Static IP address of the SNO node</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>masters[0].macaddr</td>
+            <td>MAC address of the SNO node's NIC</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>masters[0].pvmcec</td>
+            <td>CEC/system name in HMC where the SNO LPAR resides</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>masters[0].pvmlpar</td>
+            <td>LPAR name in HMC for the SNO node</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>masters[0].disk</td>
+            <td>Installation disk device (e.g. <code>/dev/sda</code>)</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>pvm_hmc</td>
+            <td>HMC connection string (e.g. <code>hscroot@9.1.2.3</code>)</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>rhcos_rhcos_base</td>
+            <td>RHCOS version base (e.g. <code>4.13</code>)</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>ocp_client_tag</td>
+            <td>OCP client version tag (e.g. <code>latest-4.13</code>)</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>workdir</td>
+            <td>Working directory for generated files (e.g. <code>/home/cloud-user/ocp4-sno</code>)</td>
+            <td><span class="req">REQUIRED</span></td>
+          </tr>
+          <tr>
+            <td>helper.networkifacename</td>
+            <td>Override bastion network interface name (auto-detected if not set)</td>
+            <td><span class="opt">OPTIONAL</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Minimal SNO <code>vars.yaml</code> Example</h3>
+      <pre><code>helper:
+  name: "helper"
+  ipaddr: "<span class="ph">9.47.87.83</span>"          <span class="cm"># Bastion IP</span>
+
+dns:
+  domain: "<span class="ph">ocp.io</span>"
+  clusterid: "<span class="ph">sno</span>"
+  forwarder1: "9.9.9.9"
+  forwarder2: "8.8.4.4"
+
+dhcp:
+  router: "<span class="ph">9.47.95.254</span>"
+  netmask: "<span class="ph">255.255.240.0</span>"
+  subnet: "<span class="ph">9.47.80.0/20</span>"
+
+masters:
+  - name: "<span class="ph">sno-82</span>"
+    ipaddr: "<span class="ph">9.47.87.82</span>"
+    macaddr: "<span class="ph">fa:b0:45:27:43:20</span>"
+    pvmcec: "<span class="ph">Server-9080-HEX-SN786E288</span>"
+    pvmlpar: "<span class="ph">sno-lpar-name</span>"
+    disk: /dev/sda
+
+pvm_hmc: <span class="ph">hscroot@9.1.2.3</span>
+
+install_type: sno
+
+rhcos_arch: "ppc64le"
+rhcos_rhcos_base: "<span class="ph">4.13</span>"
+rhcos_rhcos_tag: "latest"
+
+ocp_client_base: "ocp"
+ocp_client_tag: "<span class="ph">latest-4.13</span>"
+
+workdir: "/home/cloud-user/ocp4-sno"
+log_level: info</code></pre>
+
+      <div class="callout info">
+        <strong>Note:</strong> For SNO, define only <strong>one entry</strong> under <code>masters</code> (the SNO node). Do not define <code>workers</code> or <code>bootstrap</code> sections.
+        See <a href="ansible-bastion/docs/vars-doc.md">vars-doc.md</a> for a full description of all available variables.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 3 – Run the Playbook
+  ═══════════════════════════════════════════════════════ -->
+  <div id="run" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">3</div>
+        <h2>Run the Ansible Playbook</h2>
+      </div>
+
+      <h3>Option A &ndash; Full Automated Run (Recommended)</h3>
+      <p>Run the complete end-to-end playbook from the <code>ansible-bastion</code> directory:</p>
+      <pre><code>cd ansible-bastion
+ansible-playbook -e @vars.yaml playbooks/main.yaml</code></pre>
+
+      <p>This single command will:</p>
+      <ol style="margin: 10px 0 10px 22px;">
+        <li>Set up all bastion services (dnsmasq, httpd, haproxy, tftp)</li>
+        <li>Download RHCOS images and OCP binaries</li>
+        <li>Generate the SNO <code>install-config.yaml</code> and ignition file</li>
+        <li>Trigger network boot of the SNO LPAR via <code>lpar_netboot</code> on HMC</li>
+        <li>Set the boot order to disk after installation</li>
+        <li>Monitor the installation until completion</li>
+      </ol>
+
+      <div class="callout info">
+        <strong>Expected duration:</strong> The full automated run typically takes <strong>60&ndash;90 minutes</strong> depending on hardware and network speed.
+      </div>
+
+      <h3>Option B &ndash; Step-by-Step Playbooks</h3>
+      <p>If you prefer to run each phase individually (e.g. for troubleshooting or partial re-runs):</p>
+      <pre><code>cd ansible-bastion
+
+<span class="cm"># Step 1: Setup bastion services (DNS, DHCP, PXE, HTTP)</span>
+ansible-playbook -e @vars.yaml playbooks/step-1-setup-services.yaml
+
+<span class="cm"># Step 2: Generate ignition config</span>
+ansible-playbook -e @vars.yaml playbooks/step-2-create-ignition.yaml
+
+<span class="cm"># Step 3: Network boot the SNO LPAR via HMC</span>
+ansible-playbook -e @vars.yaml playbooks/step-3-netboot-nodes.yaml
+
+<span class="cm"># Step 4: Monitor installation progress</span>
+ansible-playbook -e @vars.yaml playbooks/step-4-monitor.yaml</code></pre>
+
+      <div class="callout warn">
+        <strong>Tip:</strong> Add <code>-v</code> or <code>-vvv</code> to any playbook command for verbose output. You can also set <code>log_level: debug</code> in <code>vars.yaml</code> for more detailed OpenShift installer logs.
+      </div>
+
+      <h3>Option C &ndash; Day 1 Setup Only (No Boot/Monitor)</h3>
+      <p>To only set up bastion services and generate the ignition file (without triggering the network boot):</p>
+      <pre><code>ansible-playbook -e @vars.yaml playbooks/setup-day1.yaml</code></pre>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 4 – Monitor
+  ═══════════════════════════════════════════════════════ -->
+  <div id="monitor" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">4</div>
+        <h2>Monitor Installation Progress</h2>
+      </div>
+
+      <p>If you ran the full <code>main.yaml</code> playbook, monitoring is included automatically. If you ran step-by-step, use <code>step-4-monitor.yaml</code> or monitor manually:</p>
+
+      <h3>Using openshift-install (from workdir)</h3>
+      <pre><code><span class="cm"># Wait for bootstrap to complete</span>
+cd <span class="ph">/home/cloud-user/ocp4-sno</span>   <span class="cm"># your workdir</span>
+./openshift-install wait-for bootstrap-complete --log-level=info
+
+<span class="cm"># Wait for full installation to complete</span>
+./openshift-install wait-for install-complete --log-level=info</code></pre>
+
+      <h3>Using oc CLI</h3>
+      <pre><code>export KUBECONFIG=<span class="ph">/home/cloud-user/ocp4-sno</span>/auth/kubeconfig
+
+<span class="cm"># Check node status</span>
+oc get nodes
+
+<span class="cm"># Check cluster version / installation progress</span>
+oc get clusterversion
+
+<span class="cm"># Check cluster operators (all Available=True when done)</span>
+oc get co
+
+<span class="cm"># Check pod status</span>
+oc get pod -A</code></pre>
+
+      <div class="callout ok">
+        <strong>Installation complete</strong> when <code>oc get clusterversion</code> shows <code>Progressing=False</code> and <code>Available=True</code>, and all cluster operators report <code>Available=True</code>.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       CLUSTER ACCESS
+  ═══════════════════════════════════════════════════════ -->
+  <div id="access" class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">5</div>
+        <h2>Cluster Access</h2>
+      </div>
+
+      <p>After a successful installation, cluster credentials are stored in <code><workdir>/auth/</code>:</p>
+      <ul>
+        <li><code>kubeconfig</code> &ndash; kubeconfig file for CLI access</li>
+        <li><code>kubeadmin-password</code> &ndash; password for the <code>kubeadmin</code> user</li>
+      </ul>
+
+      <h3>CLI Access</h3>
+      <pre><code><span class="cm"># Set kubeconfig (adjust workdir path)</span>
+export KUBECONFIG=<span class="ph">/home/cloud-user/ocp4-sno</span>/auth/kubeconfig
+
+<span class="cm"># Or login with kubeadmin</span>
+oc login https://api.<span class="ph">sno.ocp.io</span>:6443 \
+  -u kubeadmin \
+  -p $(cat <span class="ph">/home/cloud-user/ocp4-sno</span>/auth/kubeadmin-password)
+
+oc cluster-info
+oc get nodes</code></pre>
+
+      <h3>Web Console</h3>
+      <pre><code>https://console-openshift-console.apps.<span class="ph">sno.ocp.io</span></code></pre>
+      <p>Login with user <code>kubeadmin</code> and the password from <code><workdir>/auth/kubeadmin-password</code>.</p>
+
+      <h3>Download oc CLI</h3>
+      <ul>
+        <li><a href="https://mirror.openshift.com/pub/openshift-v4/ppc64le/clients/ocp/stable/openshift-client-linux.tar.gz" target="_blank">Linux (ppc64le)</a></li>
+        <li><a href="https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz" target="_blank">Linux (x86_64)</a></li>
+        <li><a href="https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-mac.tar.gz" target="_blank">Mac OSX</a></li>
+        <li><a href="https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-windows.zip" target="_blank">Windows</a></li>
+      </ul>
+
+      <div class="callout warn">
+        <strong>Security:</strong> Store the cluster credentials securely. Consider removing <code>kubeadmin-password</code> from the bastion after saving it to a secure location.
+      </div>
+    </div>
+  </div>
+
+  <!-- Troubleshooting -->
+  <div class="section-card">
+    <div class="card-body">
+      <div class="step-header">
+        <div class="step-num">&#9888;</div>
+        <h2>Troubleshooting</h2>
+      </div>
+
+      <h3>Re-run a Specific Step</h3>
+      <p>If a step fails, fix the issue and re-run only that step playbook:</p>
+      <pre><code><span class="cm"># Re-run services setup only</span>
+ansible-playbook -e @vars.yaml playbooks/step-1-setup-services.yaml
+
+<span class="cm"># Re-run ignition generation only</span>
+ansible-playbook -e @vars.yaml playbooks/step-2-create-ignition.yaml</code></pre>
+
+      <h3>Check Ansible Logs</h3>
+      <pre><code><span class="cm"># Run with verbose output</span>
+ansible-playbook -e @vars.yaml playbooks/main.yaml -vvv 2>&1 | tee ansible-run.log</code></pre>
+
+      <h3>Check Service Status on Bastion</h3>
+      <pre><code>systemctl status dnsmasq
+systemctl status httpd
+<span class="cm"># Verify DNS resolution</span>
+dig api.sno.ocp.io @localhost
+<span class="cm"># Verify HTTP server</span>
+curl http://localhost:8000/ignition/master-sno.ign | head -c 100</code></pre>
+
+      <h3>Check OpenShift Installer Logs</h3>
+      <pre><code>cat <span class="ph">/home/cloud-user/ocp4-sno</span>/.openshift_install.log | tail -50</code></pre>
+    </div>
+  </div>
+
+  <!-- Further reading -->
+  <div class="callout info">
+    <strong>Further Reading:</strong>
+    &nbsp;<a href="quick-start.html">Manual Step-by-Step Quick Start</a>
+    &nbsp;&middot;&nbsp;
+    <a href="ansible-bastion/docs/SNO.md">Full SNO Installation Guide</a>
+    &nbsp;&middot;&nbsp;
+    <a href="ansible-bastion/docs/vars-doc.md">vars.yaml Documentation</a>
+    &nbsp;&middot;&nbsp;
+    <a href="ansible-bastion/docs/AgentBasedInstaller.md">Agent-based Installer Guide</a>
+    &nbsp;&middot;&nbsp;
+    <a href="https://docs.openshift.com/container-platform/latest/installing/installing_sno/install-sno-installing-sno.html" target="_blank">Red Hat SNO Documentation</a>
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    <a href="https://github.com/ocp-power-automation/ocp4-ai-power" target="_blank">ocp4-ai-power</a>
+    &nbsp;&middot;&nbsp;
+    OpenShift on PowerVM &nbsp;&middot;&nbsp;
+    <a href="https://github.com/ocp-power-automation/ocp4-ai-power/issues" target="_blank">Report an Issue</a>
+  </p>
+</footer>
+
+</body>
+</html>
