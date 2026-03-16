@@ -48,6 +48,18 @@
         - /var/lib/tftpboot/rhcos/kernel
         - /var/lib/tftpboot/rhcos/initramfs.img
 
+    - name: Check if tftp client is installed
+      command: which tftp
+      register: tftp_client_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install tftp client if not present
+      package:
+        name: tftp
+        state: present
+      when: tftp_client_check.rc != 0
+
     - name: Test TFTP access to kernel file
       shell: |
         cd /tmp
