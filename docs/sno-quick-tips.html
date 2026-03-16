@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNO Quick Tips & Commands - OpenShift on PowerVM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .tip-section {
+            margin-bottom: 40px;
+            border-left: 4px solid #667eea;
+            padding-left: 20px;
+        }
+        
+        .tip-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        
+        .tip-section h3 {
+            color: #764ba2;
+            margin: 20px 0 10px 0;
+            font-size: 1.3em;
+        }
+        
+        .command-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .command-box pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .command-box code {
+            color: #e83e8c;
+            font-size: 0.95em;
+        }
+        
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .note strong {
+            color: #856404;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .success strong {
+            color: #155724;
+        }
+        
+        .warning {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .warning strong {
+            color: #721c24;
+        }
+        
+        .timeline {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .timeline-item {
+            padding: 10px 0;
+            border-left: 3px solid #667eea;
+            padding-left: 20px;
+            margin-left: 10px;
+        }
+        
+        .timeline-item strong {
+            color: #667eea;
+        }
+        
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.85em;
+            float: right;
+            margin-top: -5px;
+        }
+        
+        .copy-btn:hover {
+            background: #764ba2;
+        }
+        
+        ul {
+            margin: 15px 0 15px 30px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        
+        .back-link:hover {
+            background: #764ba2;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 SNO Quick Tips & Commands</h1>
+            <p>Essential commands for Single Node OpenShift installation and troubleshooting</p>
+        </header>
+        
+        <div class="content">
+            <a href="index.html" class="back-link">← Back to Documentation</a>
+            
+            <!-- Fix Space Issue -->
+            <div class="tip-section">
+                <h2>🔧 Fix: Live Environment Out of Space</h2>
+                <p>If the SNO node is running from PXE/live environment and shows root filesystem at 100%, you need to remount with more space before coreos-installer can run.</p>
+                
+                <h3>Quick Fix</h3>
+                <div class="command-box">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre><code># On SNO node - remount /run with more space
+sudo mount -o remount,size=8G /run
+
+# Verify
+df -h /run
+
+# Now install RHCOS to disk
+sudo coreos-installer install /dev/sda \
+  --ignition-url http://10.0.10.191:8000/ignition/master-sno.ign \
+  --insecure-ignition
+
+# After installation completes, reboot
+sudo reboot</code></pre>
+                </div>
+                
+                <div class="note">
+                    <strong>Note:</strong> Use <code>--insecure-ignition</code> when fetching ignition over HTTP. For HTTPS, you can omit this flag or use <code>--ignition-hash</code> instead.
+                </div>
+            </div>
+            
+            <!-- Track Bootstrap -->
+            <div class="tip-section">
+                <h2>📊 Track Bootstrap Progress</h2>
+                
+                <h3>On SNO Node</h3>
+                <div class="command-box">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre><code># SSH to SNO node
+ssh core@10.0.10.103
+
+# Watch bootkube service (main bootstrap service)
+sudo journalctl -u bootkube.service -f
+
+# Check bootkube status
+sudo systemctl status bootkube.service
+
+# Watch containers starting
+watch -n 5 'sudo crictl ps | wc -l'
+
+# List all running containers
+sudo crictl ps
+
+# Check kubelet status
+sudo systemctl status kubelet
+
+# Follow kubelet logs
+sudo journalctl -u kubelet -f</code></pre>
+                </div>
+                
+                <h3>From Bastion (Recommended)</h3>
+                <div class="command-box">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre><code># Set kubeconfig
+export KUBECONFIG=~/workdir-ocp4-ai/auth/kubeconfig
+
+# Watch cluster operators
+watch -n 10 'oc get co'
+
+# Watch nodes
+watch -n 10 'oc get nodes'
+
+# Use openshift-install to monitor
+cd ~/workdir-ocp4-ai
+openshift-install wait-for install-complete --log-level=info</code></pre>
+                </div>
+            </div>
+            
+            <!-- Bootstrap Timeline -->
+            <div class="tip-section">
+                <h2>⏱️ Bootstrap Timeline</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <strong>0-5 minutes:</strong> Node boots, kubelet starts, bootkube service begins
+                    </div>
+                    <div class="timeline-item">
+                        <strong>5-15 minutes:</strong> Static pods start (etcd, API server, controller manager)
+                    </div>
+                    <div class="timeline-item">
+                        <strong>15-25 minutes:</strong> API server becomes available, cluster operators start deploying
+                    </div>
+                    <div class="timeline-item">
+                        <strong>25-40 minutes:</strong> All cluster operators become available
+                    </div>
+                    <div class="timeline-item">
+                        <strong>40-60 minutes:</strong> Installation complete ✅
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Status Check -->
+            <div class="tip-section">
+                <h2>✅ Quick Status Check</h2>
+                
+                <h3>One-Liner Status Check</h3>
+                <div class="command-box">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre><code># From bastion
+export KUBECONFIG=~/workdir-ocp4-ai/auth/kubeconfig
+oc get clusterversion && oc get nodes && oc get co</code></pre>
+                </div>
+                
+                <h3>Status Check Script</h3>
+                <div class="command-box">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre><code>#!/bin/bash
+# Save as check-sno-status.sh on bastion
+export KUBECONFIG=~/workdir-ocp4-ai/auth/kubeconfig
+
+echo "=== SNO Installation Status ==="
+echo ""
+echo "Node Status:"
+oc get nodes 2>/dev/null || echo "  API not ready yet"
+echo ""
+echo "Cluster Operators:"
+oc get co 2>/dev/null | head -10 || echo "  API not ready yet"
+echo ""
+echo "Cluster Version:"
+oc get clusterversion 2>/dev/null || echo "  API not ready yet"</code></pre>
+                </div>
+                
+                <div class="command-box">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre><code># Make it executable and run
+chmod +x check-sno-status.sh
+watch -n 30 ./check-sno-status.sh</code></pre>
+                </div>
+            </div>
+            
+            <!-- Key Milestones -->
+            <div class="tip-section">
+                <h2>🎯 Key Milestones to Watch</h2>
+                
+                <h3>On SNO Node</h3>
+                <div class="command-box">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre><code># 1. Check if bootkube started
+sudo journalctl -u bootkube.service | grep "bootkube.service: Started"
+
+# 2. Check if static pods are running
+sudo crictl ps | grep -E "etcd|kube-apiserver|kube-controller"
+
+# 3. Check if bootstrap completed
+sudo journalctl -u bootkube.service | grep -i "bootstrap complete"</code></pre>
+                </div>
+                
+                <h3>From Bastion</h3>
+                <div class="command-box">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre><code>export KUBECONFIG=~/workdir-ocp4-ai/auth/kubeconfig
+
+# 1. Check if API server is accessible
+oc version
+
+# 2. Check if node appears
+oc get nodes
+
+# 3. Check cluster operators progress
+oc get co
+
+# 4. Check if all operators are available
+oc get co | grep -v "True.*False.*False"</code></pre>
+                </div>
+            </div>
+            
+            <!-- Verify Installation -->
+            <div class="tip-section">
+                <h2>🔍 Verify Installation Success</h2>
+                
+                <div class="success">
+                    <strong>Installation is complete when you see:</strong>
+                    <ul>
+                        <li>✅ <code>oc get nodes</code> shows node as "Ready"</li>
+                        <li>✅ <code>oc get co</code> shows all operators "Available=True, Progressing=False, Degraded=False"</li>
+                        <li>✅ <code>oc get clusterversion</code> shows "AVAILABLE=True"</li>
+                        <li>✅ Console URL is accessible</li>
+                        <li>✅ Can login with kubeadmin credentials</li>
+                    </ul>
+                </div>
+                
+                <h3>Access the Cluster</h3>
+                <div class="command-box">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre><code># Get console URL
+oc whoami --show-console
+
+# Get kubeadmin password
+cat ~/workdir-ocp4-ai/auth/kubeadmin-password
+
+# Login via CLI
+oc login -u kubeadmin -p $(cat ~/workdir-ocp4-ai/auth/kubeadmin-password)</code></pre>
+                </div>
+            </div>
+            
+            <!-- Common Issues -->
+            <div class="tip-section">
+                <h2>⚠️ Common Issues & Quick Fixes</h2>
+                
+                <h3>Issue: API Server Not Responding</h3>
+                <div class="command-box">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre><code># Check if API server pod is running
+ssh core@10.0.10.103
+sudo crictl ps | grep kube-apiserver
+
+# Check API server logs
+sudo crictl logs $(sudo crictl ps | grep kube-apiserver | awk '{print $1}')</code></pre>
+                </div>
+                
+                <h3>Issue: Node Not Ready</h3>
+                <div class="command-box">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre><code># Check node conditions
+oc describe node | grep -A 10 Conditions
+
+# Check kubelet on node
+ssh core@10.0.10.103
+sudo systemctl status kubelet
+sudo journalctl -u kubelet -n 50</code></pre>
+                </div>
+                
+                <h3>Issue: Cluster Operators Degraded</h3>
+                <div class="command-box">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre><code># Find degraded operators
+oc get co | grep -v "True.*False.*False"
+
+# Get details on specific operator
+oc describe co <operator-name>
+
+# Check operator pods
+oc get pods -n openshift-<operator-namespace></code></pre>
+                </div>
+            </div>
+            
+            <!-- Useful Aliases -->
+            <div class="tip-section">
+                <h2>💡 Useful Aliases</h2>
+                <p>Add these to your <code>~/.bashrc</code> on the bastion for quick access:</p>
+                
+                <div class="command-box">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre><code># Add to ~/.bashrc
+export KUBECONFIG=~/workdir-ocp4-ai/auth/kubeconfig
+
+# Quick aliases
+alias sno-ssh='ssh core@10.0.10.103'
+alias sno-status='oc get nodes && oc get co'
+alias sno-watch='watch -n 10 "oc get nodes && echo && oc get co"'
+alias sno-logs='ssh core@10.0.10.103 "sudo journalctl -u bootkube.service -f"'
+alias sno-pods='oc get pods -A'
+
+# Then reload
+source ~/.bashrc</code></pre>
+                </div>
+            </div>
+            
+            <!-- Related Documentation -->
+            <div class="tip-section">
+                <h2>📚 Related Documentation</h2>
+                <ul>
+                    <li><a href="sno-installation-verification.html">SNO Installation Verification Guide</a></li>
+                    <li><a href="sno-troubleshooting-guide.html">SNO Troubleshooting Guide</a></li>
+                    <li><a href="sno-quick-fix.html">SNO Quick Fix - Missing Kernel Files</a></li>
+                    <li><a href="sno-automation-fixes.html">SNO Automation Fixes</a></li>
+                    <li><a href="architecture-diagrams.html">Architecture Diagrams</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function copyCode(button) {
+            const codeBlock = button.nextElementSibling;
+            const code = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#667eea';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                button.textContent = 'Failed';
+                button.style.background = '#dc3545';
+                
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.style.background = '#667eea';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
