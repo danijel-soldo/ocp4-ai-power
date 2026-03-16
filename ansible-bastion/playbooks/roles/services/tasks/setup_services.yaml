@@ -244,8 +244,57 @@
       group: root
       mode: 0555
 
+  - name: Check if resolv.conf is immutable
+    shell: lsattr /etc/resolv.conf | grep -q '^....i'
+    register: resolv_immutable
+    failed_when: false
+    changed_when: false
+
+  - name: Remove immutable flag from resolv.conf if set
+    shell: chattr -i /etc/resolv.conf
+    when: resolv_immutable.rc == 0
+    become: true
+
   - name: Set the local resolv.conf file
     become: true
     template:
       src: ../templates/resolv.conf.j2
       dest: /etc/resolv.conf
+      attributes: "-i"
+    register: resolv_update
+    failed_when: false
+
+  - name: Handle NetworkManager managed resolv.conf
+    when: resolv_update.failed | default(false)
+    block:
+      - name: Check if NetworkManager is managing resolv.conf
+        stat:
+          path: /etc/resolv.conf
+        register: resolv_stat
+
+      - name: Stop NetworkManager from managing DNS
+        ini_file:
+          path: /etc/NetworkManager/NetworkManager.conf
+          section: main
+          option: dns
+          value: none
+          create: yes
+        when: resolv_stat.stat.islnk is defined and resolv_stat.stat.islnk
+
+      - name: Restart NetworkManager
+        systemd:
+          name: NetworkManager
+          state: restarted
+        when: resolv_stat.stat.islnk is defined and resolv_stat.stat.islnk
+
+      - name: Remove resolv.conf symlink
+        file:
+          path: /etc/resolv.conf
+          state: absent
+        when: resolv_stat.stat.islnk is defined and resolv_stat.stat.islnk
+
+      - name: Set the local resolv.conf file (retry)
+        template:
+          src: ../templates/resolv.conf.j2
+          dest: /etc/resolv.conf
+          attributes: "-i"
