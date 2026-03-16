@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture Diagrams – ocp4-ai-power</title>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    
+    // Store original mermaid code before rendering
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.mermaid').forEach(element => {
+        // Store the original text content as a data attribute
+        element.setAttribute('data-mermaid-code', element.textContent.trim());
+      });
+    });
+    
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      themeVariables: {
+        primaryColor: '#e3f2fd',
+        primaryTextColor: '#1565c0',
+        primaryBorderColor: '#1565c0',
+        lineColor: '#1e88e5',
+        secondaryColor: '#f1f8e9',
+        tertiaryColor: '#fff3e0',
+        fontSize: '14px'
+      }
+    });
+  </script>
+  <script>
+    function copyMermaidCode(buttonElement) {
+      // Find the mermaid div that contains the original code
+      const diagramContainer = buttonElement.closest('.diagram-container');
+      const mermaidDiv = diagramContainer.querySelector('.mermaid');
+      
+      // Get the original code from data attribute
+      const mermaidCode = mermaidDiv.getAttribute('data-mermaid-code');
+      
+      if (!mermaidCode) {
+        alert('Mermaid code not found. Please refresh the page.');
+        return;
+      }
+      
+      // Copy to clipboard
+      navigator.clipboard.writeText(mermaidCode).then(() => {
+        // Change button text temporarily
+        const originalText = buttonElement.textContent;
+        buttonElement.textContent = '✓ Copied!';
+        buttonElement.style.background = '#2e7d32';
+        
+        setTimeout(() => {
+          buttonElement.textContent = originalText;
+          buttonElement.style.background = '#1565c0';
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy to clipboard');
+      });
+    }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: linear-gradient(135deg, #1565c0 0%, #1e88e5 60%, #42a5f5 100%);
+      color: #fff;
+      padding: 56px 24px 44px;
+      text-align: center;
+    }
+    header h1 { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; }
+    header p.subtitle { font-size: 1.15rem; opacity: 0.9; max-width: 640px; margin: 0 auto; }
+    .back-link {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 8px 20px;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 20px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    .back-link:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    main {
+      max-width: 1200px;
+      margin: 48px auto;
+      padding: 0 20px 60px;
+      flex: 1;
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1565c0;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e3f2fd;
+    }
+    .diagram-section {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.09);
+      padding: 32px;
+      margin-bottom: 32px;
+    }
+    .diagram-section h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1565c0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .diagram-section h3 .icon {
+      font-size: 1.5rem;
+    }
+    .diagram-description {
+      font-size: 0.95rem;
+      color: #546e7a;
+      margin-bottom: 24px;
+      line-height: 1.7;
+    }
+    .diagram-container {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 24px;
+      overflow-x: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 400px;
+    }
+    .mermaid {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    .copy-button {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 10px 20px;
+      background: #1565c0;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .copy-button:hover {
+      background: #0d47a1;
+      transform: translateY(-1px);
+    }
+    .copy-button:active {
+      transform: translateY(0);
+    }
+    .button-container {
+      text-align: center;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .info-box {
+      background: #f8f9fa;
+      border-left: 4px solid #1565c0;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+    .info-box h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1565c0;
+      margin-bottom: 8px;
+    }
+    .info-box ul {
+      margin-left: 20px;
+      margin-top: 8px;
+    }
+    .info-box li {
+      margin-bottom: 4px;
+      color: #546e7a;
+    }
+    .diagram-meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .meta-tag {
+      background: #e3f2fd;
+      color: #1565c0;
+      border-radius: 12px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .callout {
+      border-left: 4px solid #1e88e5;
+      background: #e3f2fd;
+      color: #0d47a1;
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin: 24px 0;
+      font-size: 0.95rem;
+    }
+    .callout strong { font-weight: 700; }
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.85rem;
+      color: #78909c;
+      border-top: 1px solid #e0e0e0;
+      background: #fff;
+    }
+    footer a { color: #1e88e5; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 768px) {
+      header h1 { font-size: 1.8rem; }
+      .diagram-container { padding: 16px; }
+      pre { font-size: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Architecture Diagrams</h1>
+  <p class="subtitle">Visual representations of OpenShift deployment architectures on PowerVM</p>
+  <a href="index.html" class="back-link">← Back to Documentation</a>
+</header>
+
+<main>
+
+  <div class="callout">
+    <strong>About these diagrams:</strong> These diagrams illustrate the infrastructure setup, network topology, and service configurations for various OpenShift deployment scenarios on PowerVM.
+  </div>
+
+  <div class="callout">
+    <strong>❓ Why Bastion Services?</strong> Wondering why we need dedicated bastion LPARs instead of using existing corporate infrastructure?
+    <a href="bastion-services-explained.html" style="color: #0d47a1; font-weight: 700;">Read the detailed explanation →</a>
+  </div>
+
+  <!-- SNO Architecture Diagram -->
+  <div class="diagram-section">
+    <h3><span class="icon">🏗️</span> SNO (Single Node OpenShift) Architecture</h3>
+    <div class="diagram-description">
+      This diagram shows the complete SNO setup with two LPARs: a Bastion LPAR running essential services (DNS, DHCP, HTTP, TFTP) and a SNO LPAR running the OpenShift single-node cluster. The bastion provides PXE boot capabilities and serves ignition files for automated installation.
+    </div>
+    <div class="diagram-container">
+      <div class="mermaid">
+graph TB
+    subgraph PowerVM["PowerVM Environment<br/>Network: 9.47.80.0/20 | Gateway: 9.47.95.254"]
+        subgraph Bastion["Bastion LPAR<br/>IP: 9.47.87.83<br/>vCPU: 2 | Memory: 8GB | Storage: 50GB"]
+            DNS["🌐 dnsmasq<br/>━━━━━━━━━━━━━━<br/>DNS Server<br/>• api.sno.ocp.io<br/>• api-int.sno.ocp.io<br/>• *.apps.sno.ocp.io"]
+            DHCP["📡 dnsmasq<br/>━━━━━━━━━━━━━━<br/>DHCP Server<br/>• IP Assignment<br/>• PXE Boot Config"]
+            TFTP["📦 dnsmasq<br/>━━━━━━━━━━━━━━<br/>TFTP Server<br/>• /var/lib/tftpboot<br/>• PXE Boot Files"]
+            HTTP["🌍 httpd:8000<br/>━━━━━━━━━━━━━━<br/>HTTP Server<br/>• /ignition/sno.ign<br/>• /install/rootfs.img"]
+            GRUB["⚙️ grub2<br/>━━━━━━━━━━━━━━<br/>Network Boot<br/>• RHCOS Kernel<br/>• RHCOS Initramfs"]
+        end
+        
+        subgraph SNO["SNO LPAR<br/>IP: 9.47.87.82 | MAC: fa:b0:45:27:43:20<br/>vCPU: 8 | Memory: 16GB | Storage: 120GB"]
+            OCP["🎯 OpenShift Single Node<br/>━━━━━━━━━━━━━━━━━━━━<br/>• Control Plane<br/>• Worker Node<br/>• All OCP Services"]
+        end
+    end
+    
+    DNS -.->|DNS Resolution| SNO
+    DHCP -->|1. DHCP Offer<br/>IP Assignment| SNO
+    TFTP -->|2. PXE Boot<br/>Kernel + Initramfs| SNO
+    HTTP -->|3. Download<br/>Rootfs + Ignition| SNO
+    GRUB -.->|Boot Config| SNO
+    
+    style PowerVM fill:#e3f2fd,stroke:#1565c0,stroke-width:3px
+    style Bastion fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style SNO fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style DNS fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style DHCP fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style TFTP fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style HTTP fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style GRUB fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    style OCP fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+      </div>
+      <div class="button-container">
+        <button class="copy-button" onclick="copyMermaidCode(this)">📋 Copy Mermaid Code</button>
+      </div>
+    </div>
+    
+    <div class="info-box">
+      <h4>📋 Installation Flow</h4>
+      <ul>
+        <li><strong>Step 1 - Bastion Setup:</strong> Configure dnsmasq (DNS/DHCP/TFTP), httpd, PXE boot files, create ignition file, download RHCOS images</li>
+        <li><strong>Step 2 - SNO Installation:</strong> Network boot SNO LPAR via PXE → DHCP assigns IP → PXE loads kernel & initramfs → Downloads rootfs from HTTP → Applies ignition configuration → Installs OpenShift</li>
+        <li><strong>Step 3 - Monitoring:</strong> Use <code>openshift-install wait-for bootstrap-complete</code> and <code>wait-for install-complete</code>, then verify with <code>oc get nodes</code> and <code>oc get co</code></li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>🔧 Key Services on Bastion LPAR</h4>
+      <ul>
+        <li><strong>dnsmasq:</strong> Provides DNS, DHCP, and TFTP services for PXE boot</li>
+        <li><strong>httpd:</strong> HTTP server (port 8000) serving ignition files and RHCOS images</li>
+        <li><strong>grub2:</strong> Network boot configuration for PowerVM</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>📁 Important File Locations</h4>
+      <ul>
+        <li><strong>Configuration:</strong> /etc/dnsmasq.conf, /etc/dnsmasq.d/addnhosts</li>
+        <li><strong>PXE Boot:</strong> /var/lib/tftpboot/boot/grub2/grub.cfg, /var/lib/tftpboot/rhcos/</li>
+        <li><strong>HTTP Content:</strong> /var/www/html/ignition/, /var/www/html/install/</li>
+      </ul>
+    </div>
+    <div class="diagram-meta">
+      <span class="meta-tag">SNO</span>
+      <span class="meta-tag">PowerVM</span>
+      <span class="meta-tag">PXE Boot</span>
+      <span class="meta-tag">2 LPARs</span>
+      <span class="meta-tag">Bastion Services</span>
+    </div>
+  </div>
+
+  <!-- Day 2 Architecture Diagram -->
+  <div class="diagram-section">
+    <h3><span class="icon">🔧</span> Day 2 Operations - Adding Worker Nodes</h3>
+    <div class="diagram-description">
+      This diagram illustrates the Day 2 architecture where worker nodes are added to an existing OpenShift cluster. The bastion LPAR runs additional services including HAProxy for load balancing API and ingress traffic across master and worker nodes.
+    </div>
+    <div class="diagram-container">
+      <div class="mermaid">
+graph TB
+    subgraph PowerVM["PowerVM Environment - Day 2 Architecture"]
+        subgraph Bastion["Bastion LPAR<br/>All Services Running"]
+            DNS2["🌐 dnsmasq<br/>━━━━━━━━━━━━━━<br/>DNS Server<br/>• api.cluster.domain<br/>• api-int.cluster.domain<br/>• *.apps.cluster.domain"]
+            DHCP2["📡 dnsmasq<br/>━━━━━━━━━━━━━━<br/>DHCP Server<br/>• IP Assignment<br/>• PXE Boot Config"]
+            TFTP2["📦 dnsmasq<br/>━━━━━━━━━━━━━━<br/>TFTP Server<br/>• /var/lib/tftpboot<br/>• PXE Boot Files"]
+            HTTP2["🌍 httpd:8000<br/>━━━━━━━━━━━━━━<br/>HTTP Server<br/>• Ignition files<br/>• RHCOS images"]
+            HAPROXY["⚖️ HAProxy<br/>━━━━━━━━━━━━━━<br/>Load Balancer<br/>• API: 6443<br/>• Machine Config: 22623/22624<br/>• HTTP Ingress: 80<br/>• HTTPS Ingress: 443<br/>• Stats: 9000"]
+            NFS["💾 NFS (optional)<br/>━━━━━━━━━━━━━━<br/>Storage Server<br/>• Persistent Volumes<br/>• Image Registry"]
+        end
+        
+        subgraph Cluster["OpenShift Cluster"]
+            subgraph Masters["Master Nodes"]
+                M1["🎯 Master-1<br/>━━━━━━━━━━<br/>Control Plane<br/>API: 6443<br/>MCS: 22623"]
+                M2["🎯 Master-2<br/>━━━━━━━━━━<br/>Control Plane<br/>API: 6443<br/>MCS: 22623"]
+                M3["🎯 Master-3<br/>━━━━━━━━━━<br/>Control Plane<br/>API: 6443<br/>MCS: 22623"]
+            end
+            
+            subgraph Workers["Worker Nodes (Day 2)"]
+                W1["⚙️ Worker-1<br/>━━━━━━━━━━<br/>Workload Node<br/>HTTP: 80<br/>HTTPS: 443"]
+                W2["⚙️ Day2-Worker-2<br/>━━━━━━━━━━<br/>Workload Node<br/>HTTP: 80<br/>HTTPS: 443"]
+            end
+        end
+    end
+    
+    DNS2 -.->|DNS Resolution| Cluster
+    DHCP2 -->|IP Assignment| Workers
+    TFTP2 -->|PXE Boot| Workers
+    HTTP2 -->|Ignition + RHCOS| Workers
+    NFS -.->|Storage| Cluster
+    
+    HAPROXY -->|API Load Balance<br/>Port 6443| Masters
+    HAPROXY -->|Machine Config<br/>Port 22623| Masters
+    HAPROXY -->|Day2 Machine Config<br/>Port 22624| Masters
+    HAPROXY -->|HTTP Ingress<br/>Port 80| Workers
+    HAPROXY -->|HTTPS Ingress<br/>Port 443| Workers
+    
+    style PowerVM fill:#e3f2fd,stroke:#1565c0,stroke-width:3px
+    style Bastion fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style Cluster fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Masters fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style Workers fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style DNS2 fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style DHCP2 fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style TFTP2 fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style HTTP2 fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style HAPROXY fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style NFS fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    style M1 fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px
+    style M2 fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px
+    style M3 fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px
+    style W1 fill:#fff59d,stroke:#f57f17,stroke-width:2px
+    style W2 fill:#fff59d,stroke:#f57f17,stroke-width:2px
+      </div>
+      <div class="button-container">
+        <button class="copy-button" onclick="copyMermaidCode(this)">📋 Copy Mermaid Code</button>
+      </div>
+    </div>
+    
+    <div class="info-box">
+      <h4>⚖️ HAProxy Load Balancer Configuration</h4>
+      <ul>
+        <li><strong>API Server (6443):</strong> Load balances OpenShift API requests across all master nodes</li>
+        <li><strong>Machine Config Server (22623):</strong> Routes machine configuration requests during Day 1 installation</li>
+        <li><strong>Machine Config Server Day 2 (22624):</strong> Routes machine configuration requests for Day 2 worker additions</li>
+        <li><strong>HTTP Ingress (80):</strong> Load balances HTTP traffic to worker nodes (or masters if no workers)</li>
+        <li><strong>HTTPS Ingress (443):</strong> Load balances HTTPS traffic to worker nodes (or masters if no workers)</li>
+        <li><strong>Stats Dashboard (9000):</strong> HAProxy statistics and health monitoring interface</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>📋 Day 2 Installation Flow</h4>
+      <ul>
+        <li><strong>Step 1 - Service Setup:</strong> Update bastion services (dnsmasq, HAProxy) with new worker node information</li>
+        <li><strong>Step 2 - Create Ignition:</strong> Generate Day 2 ignition files for new worker nodes using existing cluster credentials</li>
+        <li><strong>Step 3 - Network Boot:</strong> PXE boot new worker LPARs using <code>lpar_netboot</code> command</li>
+        <li><strong>Step 4 - Monitor:</strong> Watch worker nodes join the cluster and approve CSRs (Certificate Signing Requests)</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>🔧 Complete Bastion Services for HA Clusters</h4>
+      <ul>
+        <li><strong>dnsmasq:</strong> DNS, DHCP, and TFTP services</li>
+        <li><strong>httpd:</strong> HTTP server for ignition files and RHCOS images</li>
+        <li><strong>HAProxy:</strong> Load balancer for API, machine config, and ingress traffic</li>
+        <li><strong>NFS (optional):</strong> Network storage for persistent volumes and image registry</li>
+        <li><strong>Squid (optional):</strong> HTTP proxy for restricted network environments</li>
+        <li><strong>Chrony (optional):</strong> Time synchronization service</li>
+      </ul>
+    </div>
+    
+    <div class="diagram-meta">
+      <span class="meta-tag">Day 2</span>
+      <span class="meta-tag">HA Cluster</span>
+      <span class="meta-tag">HAProxy</span>
+      <span class="meta-tag">Worker Nodes</span>
+      <span class="meta-tag">Load Balancer</span>
+    </div>
+  </div>
+
+  <!-- Multi-Cluster Architecture Diagram -->
+  <div class="diagram-section">
+    <h3><span class="icon">🏢</span> Multi-Cluster Architecture - Dedicated Bastion per Cluster</h3>
+    <div class="diagram-description">
+      This diagram illustrates a multi-cluster deployment strategy where each OpenShift cluster has its own dedicated bastion node. This architecture provides isolation, independent lifecycle management, and enhanced security for enterprise environments managing multiple clusters.
+    </div>
+    <div class="diagram-container">
+      <div class="mermaid">
+graph TB
+    subgraph PowerVM["PowerVM Infrastructure - Multi-Cluster Environment"]
+        subgraph Cluster1["🔵 Production Cluster"]
+            B1["🛡️ Bastion-Prod<br/>━━━━━━━━━━━━━━<br/>• dnsmasq<br/>• httpd<br/>• HAProxy<br/>• NFS"]
+            C1M1["Master-1"]
+            C1M2["Master-2"]
+            C1M3["Master-3"]
+            C1W1["Worker-1"]
+            C1W2["Worker-2"]
+            
+            B1 -.->|Manages| C1M1
+            B1 -.->|Manages| C1M2
+            B1 -.->|Manages| C1M3
+            B1 -.->|Manages| C1W1
+            B1 -.->|Manages| C1W2
+        end
+        
+        subgraph Cluster2["🟢 Development Cluster"]
+            B2["🛡️ Bastion-Dev<br/>━━━━━━━━━━━━━━<br/>• dnsmasq<br/>• httpd<br/>• HAProxy<br/>• NFS"]
+            C2M1["Master-1"]
+            C2M2["Master-2"]
+            C2M3["Master-3"]
+            C2W1["Worker-1"]
+            
+            B2 -.->|Manages| C2M1
+            B2 -.->|Manages| C2M2
+            B2 -.->|Manages| C2M3
+            B2 -.->|Manages| C2W1
+        end
+        
+        subgraph Cluster3["🟡 Testing Cluster"]
+            B3["🛡️ Bastion-Test<br/>━━━━━━━━━━━━━━<br/>• dnsmasq<br/>• httpd<br/>• HAProxy<br/>• NFS"]
+            C3M1["Master-1"]
+            C3M2["Master-2"]
+            C3M3["Master-3"]
+            C3W1["Worker-1"]
+            
+            B3 -.->|Manages| C3M1
+            B3 -.->|Manages| C3M2
+            B3 -.->|Manages| C3M3
+            B3 -.->|Manages| C3W1
+        end
+        
+        subgraph Cluster4["🔴 DR Cluster"]
+            B4["🛡️ Bastion-DR<br/>━━━━━━━━━━━━━━<br/>• dnsmasq<br/>• httpd<br/>• HAProxy<br/>• NFS"]
+            C4M1["Master-1"]
+            C4M2["Master-2"]
+            C4M3["Master-3"]
+            C4W1["Worker-1"]
+            C4W2["Worker-2"]
+            
+            B4 -.->|Manages| C4M1
+            B4 -.->|Manages| C4M2
+            B4 -.->|Manages| C4M3
+            B4 -.->|Manages| C4W1
+            B4 -.->|Manages| C4W2
+        end
+    end
+    
+    style PowerVM fill:#e3f2fd,stroke:#1565c0,stroke-width:3px
+    style Cluster1 fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style Cluster2 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Cluster3 fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style Cluster4 fill:#ffebee,stroke:#c62828,stroke-width:2px
+    
+    style B1 fill:#bbdefb,stroke:#1565c0,stroke-width:3px
+    style B2 fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    style B3 fill:#fff59d,stroke:#f57f17,stroke-width:3px
+    style B4 fill:#ffcdd2,stroke:#c62828,stroke-width:3px
+    
+    style C1M1 fill:#90caf9,stroke:#1565c0,stroke-width:2px
+    style C1M2 fill:#90caf9,stroke:#1565c0,stroke-width:2px
+    style C1M3 fill:#90caf9,stroke:#1565c0,stroke-width:2px
+    style C1W1 fill:#64b5f6,stroke:#1565c0,stroke-width:2px
+    style C1W2 fill:#64b5f6,stroke:#1565c0,stroke-width:2px
+    
+    style C2M1 fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px
+    style C2M2 fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px
+    style C2M3 fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px
+    style C2W1 fill:#81c784,stroke:#2e7d32,stroke-width:2px
+    
+    style C3M1 fill:#fff59d,stroke:#f57f17,stroke-width:2px
+    style C3M2 fill:#fff59d,stroke:#f57f17,stroke-width:2px
+    style C3M3 fill:#fff59d,stroke:#f57f17,stroke-width:2px
+    style C3W1 fill:#ffee58,stroke:#f57f17,stroke-width:2px
+    
+    style C4M1 fill:#ef9a9a,stroke:#c62828,stroke-width:2px
+    style C4M2 fill:#ef9a9a,stroke:#c62828,stroke-width:2px
+    style C4M3 fill:#ef9a9a,stroke:#c62828,stroke-width:2px
+    style C4W1 fill:#e57373,stroke:#c62828,stroke-width:2px
+    style C4W2 fill:#e57373,stroke:#c62828,stroke-width:2px
+      </div>
+      <div class="button-container">
+        <button class="copy-button" onclick="copyMermaidCode(this)">📋 Copy Mermaid Code</button>
+      </div>
+    </div>
+    
+    <div class="info-box">
+      <h4>✅ Benefits of Dedicated Bastion per Cluster</h4>
+      <ul>
+        <li><strong>🔒 Security Isolation:</strong> Each cluster has its own isolated bastion, preventing cross-cluster security breaches. If one bastion is compromised, other clusters remain protected.</li>
+        <li><strong>🎯 Independent Lifecycle Management:</strong> Upgrade, patch, or maintain each bastion independently without affecting other clusters. Different clusters can run different OpenShift versions.</li>
+        <li><strong>⚡ Performance & Scalability:</strong> Dedicated resources per cluster prevent resource contention. Each bastion can be sized appropriately for its cluster's needs.</li>
+        <li><strong>🛠️ Configuration Flexibility:</strong> Each bastion can have unique configurations (DNS zones, DHCP ranges, HAProxy rules) tailored to its cluster's requirements.</li>
+        <li><strong>🔄 Simplified Troubleshooting:</strong> Issues are isolated to specific clusters. Logs, services, and configurations are separate, making debugging easier.</li>
+        <li><strong>📊 Resource Accountability:</strong> Clear resource allocation and cost tracking per cluster. Each environment (prod, dev, test, DR) has dedicated infrastructure.</li>
+        <li><strong>🚀 Parallel Operations:</strong> Perform Day 2 operations (adding workers, upgrades) on multiple clusters simultaneously without conflicts.</li>
+        <li><strong>🔐 Network Segmentation:</strong> Each cluster can operate in different network zones with appropriate firewall rules and access controls.</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>🏗️ Typical Multi-Cluster Use Cases</h4>
+      <ul>
+        <li><strong>Production Cluster (Blue):</strong> Mission-critical workloads with high availability, strict SLAs, and enhanced monitoring</li>
+        <li><strong>Development Cluster (Green):</strong> Active development environment with frequent deployments and testing</li>
+        <li><strong>Testing/QA Cluster (Yellow):</strong> Pre-production validation, integration testing, and quality assurance</li>
+        <li><strong>Disaster Recovery Cluster (Red):</strong> Standby cluster in different location for business continuity</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>📋 Bastion Services per Cluster</h4>
+      <ul>
+        <li><strong>dnsmasq:</strong> Cluster-specific DNS zones (e.g., prod.ocp.io, dev.ocp.io, test.ocp.io, dr.ocp.io)</li>
+        <li><strong>httpd:</strong> Serves ignition files and RHCOS images for its cluster nodes</li>
+        <li><strong>HAProxy:</strong> Load balances API and ingress traffic for its cluster only</li>
+        <li><strong>NFS:</strong> Provides storage for its cluster's persistent volumes and image registry</li>
+        <li><strong>Monitoring:</strong> Each bastion can run cluster-specific monitoring and alerting</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>⚠️ Alternative: Shared Bastion Considerations</h4>
+      <p>While a shared bastion for multiple clusters is possible, it introduces:</p>
+      <ul>
+        <li>❌ Single point of failure affecting all clusters</li>
+        <li>❌ Complex configuration management with potential for conflicts</li>
+        <li>❌ Resource contention during simultaneous operations</li>
+        <li>❌ Reduced security isolation between environments</li>
+        <li>❌ Difficult troubleshooting with mixed logs and services</li>
+      </ul>
+      <p><strong>Recommendation:</strong> Use dedicated bastions for production and DR clusters at minimum. Dev/Test clusters may share a bastion if budget constraints exist.</p>
+    </div>
+    
+    <div class="diagram-meta">
+      <span class="meta-tag">Multi-Cluster</span>
+      <span class="meta-tag">Dedicated Bastion</span>
+      <span class="meta-tag">Enterprise Architecture</span>
+      <span class="meta-tag">Security Isolation</span>
+      <span class="meta-tag">Best Practices</span>
+    </div>
+  </div>
+
+  <!-- DNS Architecture Comparison Diagram -->
+  <div class="diagram-section">
+    <h3><span class="icon">🌐</span> DNS Architecture: Corporate DNS vs Bastion DNS</h3>
+    <div class="diagram-description">
+      This diagram compares two DNS approaches in a hybrid environment with x86 and Power clusters: using only corporate DNS versus using dedicated bastion DNS for each cluster. Understanding the trade-offs helps make informed architectural decisions.
+    </div>
+    <div class="diagram-container">
+      <div class="mermaid">
+graph TB
+    subgraph Corporate["Corporate Infrastructure"]
+        CorpDNS["🏢 Corporate DNS<br/>━━━━━━━━━━━━━━<br/>• company.com zone<br/>• Centrally managed<br/>• Change control process<br/>• High availability"]
+        CorpDHCP["🏢 Corporate DHCP<br/>━━━━━━━━━━━━━━<br/>• Enterprise-wide<br/>• Standardized"]
+        CorpLB["🏢 Corporate Load Balancer<br/>━━━━━━━━━━━━━━<br/>• F5 / NetScaler<br/>• Expensive<br/>• Long provisioning"]
+    end
+    
+    subgraph X86["x86 Infrastructure"]
+        X86Cluster1["☁️ x86 OCP Cluster 1<br/>━━━━━━━━━━━━━━<br/>prod-x86.company.com<br/>• Uses Corporate DNS<br/>• Uses Corporate LB<br/>• Established process"]
+        X86Cluster2["☁️ x86 OCP Cluster 2<br/>━━━━━━━━━━━━━━<br/>dev-x86.company.com<br/>• Uses Corporate DNS<br/>• Uses Corporate LB<br/>• Established process"]
+    end
+    
+    subgraph PowerApproach1["❌ Approach 1: Corporate DNS Only (Not Recommended)"]
+        PowerCluster1A["⚡ Power OCP Cluster 1<br/>━━━━━━━━━━━━━━<br/>prod-power.company.com<br/>❌ Depends on Corp DNS<br/>❌ Slow changes<br/>❌ No self-service"]
+        PowerCluster2A["⚡ Power OCP Cluster 2<br/>━━━━━━━━━━━━━━<br/>dev-power.company.com<br/>❌ Depends on Corp DNS<br/>❌ Slow changes<br/>❌ No self-service"]
+    end
+    
+    subgraph PowerApproach2["✅ Approach 2: Bastion DNS (Recommended)"]
+        subgraph Bastion1["Bastion 1"]
+            B1DNS["🛡️ Bastion DNS<br/>━━━━━━━━━━━━━━<br/>• prod-power.company.com<br/>• Self-service<br/>• Instant changes<br/>• Forwards to Corp DNS"]
+            B1HAProxy["⚖️ HAProxy<br/>━━━━━━━━━━━━━━<br/>• API: 6443<br/>• Ingress: 80/443"]
+        end
+        PowerCluster1B["⚡ Power OCP Cluster 1<br/>━━━━━━━━━━━━━━<br/>prod-power.company.com<br/>✅ Independent<br/>✅ Fast deployment<br/>✅ Self-service"]
+        
+        subgraph Bastion2["Bastion 2"]
+            B2DNS["🛡️ Bastion DNS<br/>━━━━━━━━━━━━━━<br/>• dev-power.company.com<br/>• Self-service<br/>• Instant changes<br/>• Forwards to Corp DNS"]
+            B2HAProxy["⚖️ HAProxy<br/>━━━━━━━━━━━━━━<br/>• API: 6443<br/>• Ingress: 80/443"]
+        end
+        PowerCluster2B["⚡ Power OCP Cluster 2<br/>━━━━━━━━━━━━━━<br/>dev-power.company.com<br/>✅ Independent<br/>✅ Fast deployment<br/>✅ Self-service"]
+    end
+    
+    CorpDNS -.->|Manages zones| X86Cluster1
+    CorpDNS -.->|Manages zones| X86Cluster2
+    CorpLB -.->|Load balances| X86Cluster1
+    CorpLB -.->|Load balances| X86Cluster2
+    
+    CorpDNS -.->|❌ Slow process| PowerCluster1A
+    CorpDNS -.->|❌ Slow process| PowerCluster2A
+    
+    B1DNS -->|Authoritative for cluster| PowerCluster1B
+    B1DNS -.->|Forwards external queries| CorpDNS
+    B1HAProxy -->|Load balances| PowerCluster1B
+    
+    B2DNS -->|Authoritative for cluster| PowerCluster2B
+    B2DNS -.->|Forwards external queries| CorpDNS
+    B2HAProxy -->|Load balances| PowerCluster2B
+    
+    CorpDNS -.->|Delegates subdomain<br/>prod-power.company.com| B1DNS
+    CorpDNS -.->|Delegates subdomain<br/>dev-power.company.com| B2DNS
+    
+    style Corporate fill:#f5f5f5,stroke:#757575,stroke-width:2px
+    style X86 fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style PowerApproach1 fill:#ffebee,stroke:#c62828,stroke-width:3px
+    style PowerApproach2 fill:#e8f5e9,stroke:#2e7d32,stroke-width:3px
+    style CorpDNS fill:#e0e0e0,stroke:#616161,stroke-width:2px
+    style CorpDHCP fill:#e0e0e0,stroke:#616161,stroke-width:2px
+    style CorpLB fill:#e0e0e0,stroke:#616161,stroke-width:2px
+    style X86Cluster1 fill:#90caf9,stroke:#1565c0,stroke-width:2px
+    style X86Cluster2 fill:#90caf9,stroke:#1565c0,stroke-width:2px
+    style PowerCluster1A fill:#ef9a9a,stroke:#c62828,stroke-width:2px
+    style PowerCluster2A fill:#ef9a9a,stroke:#c62828,stroke-width:2px
+    style Bastion1 fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style Bastion2 fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style B1DNS fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px
+    style B1HAProxy fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px
+    style B2DNS fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px
+    style B2HAProxy fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px
+    style PowerCluster1B fill:#81c784,stroke:#2e7d32,stroke-width:2px
+    style PowerCluster2B fill:#81c784,stroke:#2e7d32,stroke-width:2px
+      </div>
+      <div class="button-container">
+        <button class="copy-button" onclick="copyMermaidCode(this)">📋 Copy Mermaid Code</button>
+      </div>
+    </div>
+    
+    <div class="info-box">
+      <h4>❌ Approach 1: Corporate DNS Only - Challenges</h4>
+      <ul>
+        <li><strong>Slow Change Management:</strong>
+          <ul>
+            <li>❌ DNS changes require tickets and approvals (days/weeks)</li>
+            <li>❌ Each cluster creation/destruction needs DNS team involvement</li>
+            <li>❌ Dev/test clusters can't be created on-demand</li>
+            <li>❌ Troubleshooting requires waiting for DNS changes</li>
+          </ul>
+        </li>
+        <li><strong>No Load Balancer:</strong>
+          <ul>
+            <li>❌ Corporate LB provisioning is expensive and slow</li>
+            <li>❌ May not support OpenShift-specific requirements</li>
+            <li>❌ Overkill for dev/test clusters</li>
+          </ul>
+        </li>
+        <li><strong>PXE Boot Issues:</strong>
+          <ul>
+            <li>❌ Corporate DHCP can't provide PowerVM-specific boot parameters</li>
+            <li>❌ No integration with TFTP for netboot</li>
+            <li>❌ Can't serve ignition files during boot</li>
+          </ul>
+        </li>
+        <li><strong>Operational Overhead:</strong>
+          <ul>
+            <li>❌ Every cluster operation requires coordination with DNS team</li>
+            <li>❌ Day 2 operations (adding workers) need DNS updates</li>
+            <li>❌ Can't quickly iterate during troubleshooting</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>✅ Approach 2: Bastion DNS - Benefits</h4>
+      <ul>
+        <li><strong>Self-Service & Speed:</strong>
+          <ul>
+            <li>✅ Create/destroy clusters instantly without DNS tickets</li>
+            <li>✅ Modify DNS entries immediately during troubleshooting</li>
+            <li>✅ Dev/test clusters can be spun up on-demand</li>
+            <li>✅ Day 2 operations (add workers) are instant</li>
+          </ul>
+        </li>
+        <li><strong>Integrated Services:</strong>
+          <ul>
+            <li>✅ DNS, DHCP, TFTP, HTTP work together seamlessly</li>
+            <li>✅ PXE boot works out-of-the-box for PowerVM</li>
+            <li>✅ HAProxy provides free, integrated load balancing</li>
+            <li>✅ All services configured for OpenShift requirements</li>
+          </ul>
+        </li>
+        <li><strong>Isolation & Security:</strong>
+          <ul>
+            <li>✅ Each cluster's DNS is isolated</li>
+            <li>✅ Cluster compromise doesn't affect corporate DNS</li>
+            <li>✅ Different security policies per cluster</li>
+            <li>✅ Clear audit trail per cluster</li>
+          </ul>
+        </li>
+        <li><strong>Hybrid Integration:</strong>
+          <ul>
+            <li>✅ Bastion DNS forwards external queries to corporate DNS</li>
+            <li>✅ Corporate DNS can delegate subdomains to bastion</li>
+            <li>✅ Best of both worlds: self-service + corporate integration</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>🔄 DNS Delegation Strategy (Recommended)</h4>
+      <p><strong>Best Practice:</strong> Use DNS delegation to integrate bastion DNS with corporate DNS:</p>
+      <ol>
+        <li><strong>Corporate DNS delegates subdomain:</strong>
+          <ul>
+            <li>Corporate DNS: "For prod-power.company.com, ask bastion-1 at 10.1.1.10"</li>
+            <li>Corporate DNS: "For dev-power.company.com, ask bastion-2 at 10.1.1.20"</li>
+          </ul>
+        </li>
+        <li><strong>Bastion DNS is authoritative for its subdomain:</strong>
+          <ul>
+            <li>Bastion-1 answers: api.prod-power.company.com → 10.1.1.11</li>
+            <li>Bastion-1 answers: *.apps.prod-power.company.com → 10.1.1.11</li>
+          </ul>
+        </li>
+        <li><strong>Bastion DNS forwards other queries:</strong>
+          <ul>
+            <li>Query for google.com → Forward to corporate DNS</li>
+            <li>Query for other-cluster.company.com → Forward to corporate DNS</li>
+          </ul>
+        </li>
+      </ol>
+      <p><strong>Result:</strong> Users can resolve cluster DNS from anywhere in the corporate network, but cluster teams have full control over their DNS zone.</p>
+    </div>
+    
+    <div class="info-box">
+      <h4>📊 Comparison Table</h4>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
+        <tr style="background: #f5f5f5;">
+          <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Aspect</th>
+          <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Corporate DNS Only</th>
+          <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Bastion DNS</th>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Cluster Creation Time</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">❌ Days/weeks (DNS tickets)</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">✅ Minutes (self-service)</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Day 2 Operations</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">❌ Requires DNS team</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">✅ Instant, self-service</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Load Balancer</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">❌ Expensive, slow provisioning</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">✅ Free HAProxy included</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>PXE Boot Support</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">❌ Complex/impossible</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">✅ Built-in, tested</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Troubleshooting</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">❌ Slow (wait for DNS changes)</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">✅ Fast (immediate changes)</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Security Isolation</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">❌ Shared infrastructure</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">✅ Per-cluster isolation</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Cost</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">❌ High (LB, DNS team time)</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">✅ Low (2 vCPU, 8GB RAM)</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Corporate Integration</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">✅ Native</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">✅ Via delegation/forwarding</td>
+        </tr>
+      </table>
+    </div>
+    
+    <div class="info-box">
+      <h4>🎯 Recommendation</h4>
+      <p><strong>Use Bastion DNS for Power clusters</strong> while keeping x86 clusters on corporate DNS if that's already working well.</p>
+      <ul>
+        <li>✅ <strong>x86 clusters:</strong> Continue using corporate DNS if established processes work</li>
+        <li>✅ <strong>Power clusters:</strong> Use bastion DNS for speed, flexibility, and PowerVM-specific requirements</li>
+        <li>✅ <strong>Integration:</strong> Use DNS delegation so both approaches work together seamlessly</li>
+        <li>✅ <strong>Best of both:</strong> Corporate governance + self-service agility</li>
+      </ul>
+    </div>
+    
+    <div class="diagram-meta">
+      <span class="meta-tag">DNS Architecture</span>
+      <span class="meta-tag">Corporate DNS</span>
+      <span class="meta-tag">Bastion DNS</span>
+      <span class="meta-tag">Hybrid Environment</span>
+      <span class="meta-tag">x86 vs Power</span>
+    </div>
+  </div>
+
+  <!-- Assisted Installer Sequence Diagram -->
+  <div class="diagram-section">
+    <h3><span class="icon">🔄</span> Assisted Installer - Installation Sequence</h3>
+    <div class="diagram-description">
+      This sequence diagram shows the step-by-step workflow for installing OpenShift using the Assisted Installer automation. The process involves bastion setup, Red Hat Console interaction, PXE boot, and automated cluster installation.
+    </div>
+    <div class="diagram-container">
+      <div class="mermaid">
+sequenceDiagram
+    participant User
+    participant Bastion as Bastion LPAR
+    participant Console as Red Hat Console<br/>(console.redhat.com)
+    participant Nodes as OCP Nodes<br/>(Masters/Workers)
+    participant HMC as HMC/PowerVM
+    
+    Note over User,HMC: Phase 1: Bastion Setup
+    User->>Bastion: 1. Provision bastion LPAR<br/>(2 vCPU, 8GB RAM, 50GB)
+    User->>Bastion: 2. Set SELINUX=permissive
+    User->>Bastion: 3. Run Ansible playbook<br/>(setup-bastion.yaml)
+    Bastion->>Bastion: Install packages:<br/>dnsmasq, httpd, haproxy,<br/>coreos-installer
+    Bastion->>Bastion: Configure dnsmasq<br/>(DNS, DHCP, TFTP)
+    Bastion->>Bastion: Configure HAProxy<br/>(API: 6443, Ingress: 80/443)
+    Bastion->>Bastion: Setup PXE boot<br/>(grub2-mknetdir)
+    
+    Note over User,HMC: Phase 2: Create Discovery ISO
+    User->>Console: 4. Login to Assisted Installer
+    User->>Console: 5. Click "Create Cluster"
+    User->>Console: 6. Fill cluster details<br/>(name, domain, version)
+    User->>Console: 7. Skip operators selection
+    User->>Console: 8. Add hosts → Generate ISO
+    Console->>Console: Generate Discovery ISO<br/>with embedded ignition
+    Console-->>User: 9. Provide ISO download URL
+    
+    Note over User,HMC: Phase 3: Extract & Deploy ISO
+    User->>Bastion: 10. Download discovery ISO
+    Bastion->>Bastion: 11. Extract ignition file<br/>(coreos-installer iso ignition show)
+    Bastion->>Bastion: 12. Extract PXE files<br/>(kernel, initramfs, rootfs)
+    Bastion->>Bastion: 13. Copy to directories:<br/>• /var/www/html/ignition/<br/>• /var/www/html/install/<br/>• /var/lib/tftpboot/rhcos/
+    Bastion->>Bastion: 14. Update grub.cfg<br/>with node MAC addresses
+    
+    Note over User,HMC: Phase 4: Network Boot Nodes
+    User->>HMC: 15. Execute lpar_netboot<br/>for each node
+    HMC->>Nodes: 16. Initiate PXE boot
+    Nodes->>Bastion: 17. DHCP request
+    Bastion-->>Nodes: 18. DHCP offer + PXE config
+    Nodes->>Bastion: 19. TFTP: Download kernel<br/>& initramfs
+    Nodes->>Bastion: 20. HTTP: Download rootfs.img
+    Nodes->>Bastion: 21. HTTP: Download ignition
+    Nodes->>Nodes: 22. Boot RHCOS with ignition
+    Nodes->>Console: 23. Register with<br/>Assisted Service
+    
+    Note over User,HMC: Phase 5: Monitor & Install
+    Console->>Console: 24. Discover nodes<br/>(hardware inventory)
+    User->>Console: 25. Verify all nodes "Ready"
+    User->>Console: 26. Configure storage
+    User->>Console: 27. Select "User-Managed<br/>Networking"
+    User->>Console: 28. Review & click<br/>"Install Cluster"
+    Console->>Nodes: 29. Start installation
+    Nodes->>Nodes: 30. Install RHCOS to disk
+    Nodes->>Nodes: 31. Bootstrap cluster
+    Nodes->>Nodes: 32. Deploy control plane
+    Nodes->>Nodes: 33. Deploy operators
+    Console-->>User: 34. Installation progress<br/>& events
+    
+    Note over User,HMC: Phase 6: Completion
+    Nodes->>Console: 35. Report installation<br/>complete
+    Console-->>User: 36. Display "Cluster Ready"
+    User->>Console: 37. Download kubeconfig
+    User->>Console: 38. Get kubeadmin password
+    User->>Bastion: 39. Set KUBECONFIG
+    User->>Nodes: 40. Verify cluster:<br/>oc get nodes, oc get co
+      </div>
+      <div class="button-container">
+        <button class="copy-button" onclick="copyMermaidCode(this)">📋 Copy Mermaid Code</button>
+      </div>
+    </div>
+    
+    <div class="info-box">
+      <h4>📋 Installation Phases Explained</h4>
+      <ul>
+        <li><strong>Phase 1 - Bastion Setup (Steps 1-3):</strong> Provision and configure bastion LPAR with all required services (DNS, DHCP, TFTP, HTTP, HAProxy)</li>
+        <li><strong>Phase 2 - Create Discovery ISO (Steps 4-9):</strong> Use Red Hat Console to generate cluster-specific discovery ISO with embedded ignition configuration</li>
+        <li><strong>Phase 3 - Extract & Deploy (Steps 10-14):</strong> Download ISO, extract components, and deploy to bastion's PXE/HTTP directories</li>
+        <li><strong>Phase 4 - Network Boot (Steps 15-23):</strong> PXE boot all nodes, download RHCOS and ignition, register with Assisted Service</li>
+        <li><strong>Phase 5 - Monitor & Install (Steps 24-34):</strong> Monitor node discovery, configure cluster settings, start automated installation</li>
+        <li><strong>Phase 6 - Completion (Steps 35-40):</strong> Download credentials, verify cluster health</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>🔑 Key Components & Their Roles</h4>
+      <ul>
+        <li><strong>Bastion LPAR:</strong>
+          <ul>
+            <li>Runs dnsmasq (DNS, DHCP, TFTP for PXE boot)</li>
+            <li>Runs httpd (serves ignition files and RHCOS images)</li>
+            <li>Runs HAProxy (load balances API and ingress traffic)</li>
+            <li>Stores extracted ISO components</li>
+          </ul>
+        </li>
+        <li><strong>Red Hat Console (Assisted Installer):</strong>
+          <ul>
+            <li>Generates cluster-specific discovery ISO</li>
+            <li>Manages cluster configuration and validation</li>
+            <li>Orchestrates installation process</li>
+            <li>Monitors installation progress and events</li>
+          </ul>
+        </li>
+        <li><strong>Discovery ISO:</strong>
+          <ul>
+            <li>Contains RHCOS kernel, initramfs, and rootfs</li>
+            <li>Embeds cluster-specific ignition configuration</li>
+            <li>Includes Assisted Installer agent</li>
+            <li>Registers nodes with Assisted Service</li>
+          </ul>
+        </li>
+        <li><strong>HMC/PowerVM:</strong>
+          <ul>
+            <li>Manages LPAR lifecycle</li>
+            <li>Executes lpar_netboot for PXE boot</li>
+            <li>Provides hardware virtualization</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>⚡ Automation with Ansible</h4>
+      <p>The repository provides Ansible playbooks to automate most of these steps:</p>
+      <ul>
+        <li><strong>setup-bastion.yaml:</strong> Automates Phase 1 (bastion setup)</li>
+        <li><strong>step-1-setup-services.yaml:</strong> Configures dnsmasq, httpd, HAProxy</li>
+        <li><strong>step-2-create-ignition.yaml:</strong> Downloads and extracts discovery ISO</li>
+        <li><strong>step-3-netboot-nodes.yaml:</strong> Executes lpar_netboot commands</li>
+        <li><strong>step-4-monitor.yaml:</strong> Monitors installation progress</li>
+      </ul>
+      <p><strong>Usage:</strong> <code>ansible-playbook -e @vars.yaml playbooks/main.yaml</code></p>
+    </div>
+    
+    <div class="info-box">
+      <h4>🆚 Assisted Installer vs Agent-Based Installer</h4>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
+        <tr style="background: #f5f5f5;">
+          <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Aspect</th>
+          <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Assisted Installer</th>
+          <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Agent-Based Installer</th>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Interface</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">Web UI + REST API</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">CLI only</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Internet Required</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">Yes (console.redhat.com)</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">No (fully disconnected)</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Monitoring</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">Real-time in web UI</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">CLI commands only</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Ease of Use</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">⭐⭐⭐⭐⭐ (Very easy)</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">⭐⭐⭐ (Moderate)</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Best For</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">Connected environments, first-time users</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">Air-gapped, automated deployments</td>
+        </tr>
+      </table>
+    </div>
+    
+    <div class="diagram-meta">
+      <span class="meta-tag">Assisted Installer</span>
+      <span class="meta-tag">Installation Sequence</span>
+      <span class="meta-tag">Automation</span>
+      <span class="meta-tag">PXE Boot</span>
+      <span class="meta-tag">Workflow</span>
+    </div>
+  </div>
+
+  <!-- Placeholder for future diagrams -->
+  <div class="callout">
+    <strong>More diagrams coming soon:</strong> Additional architecture diagrams for Agent-based installer and other deployment scenarios will be added here.
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    <a href="https://github.com/danijel-soldo/ocp4-ai-power" target="_blank">ocp4-ai-power</a>
+    &nbsp;&middot;&nbsp;
+    OpenShift on PowerVM &nbsp;&middot;&nbsp;
+    <a href="index.html">Documentation Home</a>
+  </p>
+</footer>
+
+</body>
+</html>

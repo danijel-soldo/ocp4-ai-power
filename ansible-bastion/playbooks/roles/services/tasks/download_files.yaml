@@ -64,32 +64,97 @@
   - name: Download RHCOS images
     when: force_ocp_download or install_type == "sno" or install_type == "normal" or (install_type == "assisted" and assisted_iso_type != "full-iso")
     block:
+    - name: Ensure TFTP RHCOS directory exists
+      file:
+        path: /var/lib/tftpboot/rhcos
+        state: directory
+        mode: 0755
+        owner: dnsmasq
+        group: dnsmasq
+
+    - name: Ensure HTTP install directory exists
+      file:
+        path: /var/www/html/install
+        state: directory
+        mode: 0755
+
     - name: Get CoreOS rootfs.img URL
       shell: /usr/local/bin/openshift-install coreos print-stream-json | jq -r .architectures.ppc64le.artifacts.metal.formats.pxe.rootfs.location
       register: rhcos_rootfs_url
+      failed_when: rhcos_rootfs_url.stdout == "" or rhcos_rootfs_url.stdout == "null"
+
     - name: Downloading CoreOS rootfs.img
       get_url:
         url: "{{ rhcos_rootfs_url.stdout }}"
         dest: /var/www/html/install/rootfs.img
-        mode: 0555
+        mode: 0644
         force: true
+        timeout: 300
+      register: rootfs_download
+      retries: 3
+      delay: 10
+      until: rootfs_download is succeeded
+
+    - name: Verify rootfs.img was downloaded
+      stat:
+        path: /var/www/html/install/rootfs.img
+      register: rootfs_stat
+      failed_when: not rootfs_stat.stat.exists or rootfs_stat.stat.size < 100000000
 
     - name: Get CoreOS initramfs.img URL
       shell: /usr/local/bin/openshift-install coreos print-stream-json | jq -r .architectures.ppc64le.artifacts.metal.formats.pxe.initramfs.location
       register: rhcos_initramfs_url
+      failed_when: rhcos_initramfs_url.stdout == "" or rhcos_initramfs_url.stdout == "null"
+
     - name: Downloading CoreOS initramfs.img
       get_url:
         url: "{{ rhcos_initramfs_url.stdout }}"
         dest: /var/lib/tftpboot/rhcos/initramfs.img
-        mode: 0555
+        mode: 0644
+        owner: dnsmasq
+        group: dnsmasq
         force: true
+        timeout: 300
+      register: initramfs_download
+      retries: 3
+      delay: 10
+      until: initramfs_download is succeeded
+
+    - name: Verify initramfs.img was downloaded
+      stat:
+        path: /var/lib/tftpboot/rhcos/initramfs.img
+      register: initramfs_stat
+      failed_when: not initramfs_stat.stat.exists or initramfs_stat.stat.size < 10000000
 
     - name: Get CoreOS kernel URL
       shell: /usr/local/bin/openshift-install coreos print-stream-json | jq -r .architectures.ppc64le.artifacts.metal.formats.pxe.kernel.location
       register: rhcos_kernel_url
+      failed_when: rhcos_kernel_url.stdout == "" or rhcos_kernel_url.stdout == "null"
+
     - name: Downloading CoreOS kernel
       get_url:
         url: "{{ rhcos_kernel_url.stdout }}"
         dest: /var/lib/tftpboot/rhcos/kernel
-        mode: 0555
+        mode: 0644
+        owner: dnsmasq
+        group: dnsmasq
         force: true
+        timeout: 300
+      register: kernel_download
+      retries: 3
+      delay: 10
+      until: kernel_download is succeeded
+
+    - name: Verify kernel was downloaded
+      stat:
+        path: /var/lib/tftpboot/rhcos/kernel
+      register: kernel_stat
+      failed_when: not kernel_stat.stat.exists or kernel_stat.stat.size < 5000000
+
+    - name: Display RHCOS file download summary
+      debug:
+        msg:
+          - "RHCOS files downloaded successfully:"
+          - "  - rootfs.img: {{ (rootfs_stat.stat.size / 1024 / 1024) | round(2) }} MB"
+          - "  - initramfs.img: {{ (initramfs_stat.stat.size / 1024 / 1024) | round(2) }} MB"
+          - "  - kernel: {{ (kernel_stat.stat.size / 1024 / 1024) | round(2) }} MB"

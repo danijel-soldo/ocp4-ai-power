@@ -26,6 +26,10 @@
   include_tasks: download_files.yaml
   when: day2_workers is not defined
 
+- name: Verify RHCOS files are present and accessible
+  include_tasks: verify_rhcos_files.yaml
+  when: day2_workers is not defined
+
 - name: Setup Local Registry
   when: setup_registry is defined and setup_registry.deploy and day2_workers is not defined
   block:

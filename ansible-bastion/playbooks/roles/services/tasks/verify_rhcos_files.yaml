@@ -1,0 +1,67 @@
+---
+# Verify RHCOS files are present and valid before proceeding
+- name: Verify RHCOS files for PXE boot
+  when: install_type == "sno" or install_type == "normal" or (install_type == "assisted" and assisted_iso_type != "full-iso")
+  block:
+    - name: Check if TFTP kernel exists
+      stat:
+        path: /var/lib/tftpboot/rhcos/kernel
+      register: tftp_kernel
+
+    - name: Check if TFTP initramfs exists
+      stat:
+        path: /var/lib/tftpboot/rhcos/initramfs.img
+      register: tftp_initramfs
+
+    - name: Check if HTTP rootfs exists
+      stat:
+        path: /var/www/html/install/rootfs.img
+      register: http_rootfs
+
+    - name: Verify all RHCOS files are present
+      assert:
+        that:
+          - tftp_kernel.stat.exists
+          - tftp_kernel.stat.size > 5000000
+          - tftp_initramfs.stat.exists
+          - tftp_initramfs.stat.size > 10000000
+          - http_rootfs.stat.exists
+          - http_rootfs.stat.size > 100000000
+        fail_msg: |
+          RHCOS files are missing or too small. Please check:
+          - Kernel: {{ tftp_kernel.stat.exists | default(false) }} ({{ (tftp_kernel.stat.size | default(0) / 1024 / 1024) | round(2) }} MB)
+          - Initramfs: {{ tftp_initramfs.stat.exists | default(false) }} ({{ (tftp_initramfs.stat.size | default(0) / 1024 / 1024) | round(2) }} MB)
+          - Rootfs: {{ http_rootfs.stat.exists | default(false) }} ({{ (http_rootfs.stat.size | default(0) / 1024 / 1024) | round(2) }} MB)
+        success_msg: |
+          All RHCOS files verified successfully:
+          - Kernel: {{ (tftp_kernel.stat.size / 1024 / 1024) | round(2) }} MB
+          - Initramfs: {{ (tftp_initramfs.stat.size / 1024 / 1024) | round(2) }} MB
+          - Rootfs: {{ (http_rootfs.stat.size / 1024 / 1024) | round(2) }} MB
+
+    - name: Verify TFTP file permissions
+      file:
+        path: "{{ item }}"
+        owner: dnsmasq
+        group: dnsmasq
+        mode: '0644'
+      with_items:
+        - /var/lib/tftpboot/rhcos/kernel
+        - /var/lib/tftpboot/rhcos/initramfs.img
+
+    - name: Test TFTP access to kernel file
+      shell: |
+        cd /tmp
+        timeout 10 tftp localhost -c get rhcos/kernel test-kernel 2>&1
+        result=$?
+        rm -f test-kernel
+        exit $result
+      register: tftp_test
+      failed_when: tftp_test.rc != 0
+      changed_when: false
+
+    - name: Display TFTP test result
+      debug:
+        msg: "TFTP access verified - kernel file is accessible via TFTP"
+      when: tftp_test.rc == 0
+
+# Made with Bob

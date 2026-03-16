@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bastion Services Explained – ocp4-ai-power</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: linear-gradient(135deg, #1565c0 0%, #1e88e5 60%, #42a5f5 100%);
+      color: #fff;
+      padding: 56px 24px 44px;
+      text-align: center;
+    }
+    header h1 { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; }
+    header p.subtitle { font-size: 1.15rem; opacity: 0.9; max-width: 640px; margin: 0 auto; }
+    .back-link {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 8px 20px;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 20px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    .back-link:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    main {
+      max-width: 1000px;
+      margin: 48px auto;
+      padding: 0 20px 60px;
+      flex: 1;
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1565c0;
+      margin: 32px 0 20px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e3f2fd;
+    }
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #1565c0;
+      margin: 24px 0 12px;
+    }
+    .section {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.09);
+      padding: 32px;
+      margin-bottom: 32px;
+    }
+    .callout {
+      border-left: 4px solid #1e88e5;
+      background: #e3f2fd;
+      color: #0d47a1;
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin: 24px 0;
+      font-size: 0.95rem;
+    }
+    .callout strong { font-weight: 700; }
+    .info-box {
+      background: #f8f9fa;
+      border-left: 4px solid #1565c0;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+    .info-box h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1565c0;
+      margin-bottom: 8px;
+    }
+    .info-box ul {
+      margin-left: 20px;
+      margin-top: 8px;
+    }
+    .info-box li {
+      margin-bottom: 4px;
+      color: #546e7a;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background: #f5f5f5;
+      font-weight: 700;
+    }
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.85rem;
+      color: #78909c;
+      border-top: 1px solid #e0e0e0;
+      background: #fff;
+    }
+    footer a { color: #1e88e5; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 768px) {
+      header h1 { font-size: 1.8rem; }
+      .section { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Why Bastion Services?</h1>
+  <p class="subtitle">Understanding the need for dedicated bastion LPARs in OpenShift on PowerVM deployments</p>
+  <a href="architecture-diagrams.html" class="back-link">← Back to Architecture Diagrams</a>
+</header>
+
+<main>
+
+  <div class="callout">
+    <strong>Key Question:</strong> "Why do we need a dedicated bastion LPAR when we already have DNS, DHCP, and other services in our infrastructure?" This page provides a comprehensive answer.
+  </div>
+
+  <div class="section">
+    <h2>❓ Why Dedicated Bastion LPAR? Can't We Use Existing Infrastructure?</h2>
+    <p>A common question: "Why do we need a dedicated bastion LPAR when we already have DNS, DHCP, and other services in our infrastructure?" Here's a comprehensive explanation of why a dedicated bastion is essential for OpenShift on PowerVM.</p>
+    
+    <div class="info-box">
+      <h4>🎯 Critical Requirements That Existing Infrastructure Can't Meet</h4>
+      <ul>
+        <li><strong>PXE/Network Boot Control:</strong> OpenShift installation requires precise control over PXE boot sequences, kernel parameters, and ignition file delivery. Existing DHCP servers typically can't provide the granular, cluster-specific boot configurations needed for PowerVM LPARs.</li>
+        <li><strong>Ignition File Serving:</strong> OpenShift uses ignition files (not cloud-init) for node configuration. These files contain cluster-specific certificates, configurations, and secrets that must be served securely and reliably during the critical bootstrap phase.</li>
+        <li><strong>RHCOS Image Hosting:</strong> The bastion must serve large RHCOS (Red Hat CoreOS) images (kernel, initramfs, rootfs) during installation. Existing web servers may not be configured or authorized to host these specific files.</li>
+        <li><strong>Cluster-Specific DNS Zones:</strong> OpenShift requires specific DNS entries (api, api-int, *.apps) that are tightly coupled to the cluster. Modifying corporate DNS for each cluster creates dependencies and change management overhead.</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>🔒 Security & Isolation Concerns</h4>
+      <ul>
+        <li><strong>Network Segmentation:</strong> OpenShift clusters often run in isolated network segments. A bastion in the same network provides services without requiring firewall exceptions to corporate infrastructure.</li>
+        <li><strong>Credential Isolation:</strong> The bastion holds cluster-specific credentials, certificates, and pull secrets. Keeping these on a dedicated system prevents exposure to broader infrastructure.</li>
+        <li><strong>Blast Radius Containment:</strong> If a cluster or its bastion is compromised, the impact is contained. Corporate DNS/DHCP servers remain unaffected.</li>
+        <li><strong>Compliance & Audit:</strong> Many organizations require separation between production infrastructure and development/test clusters. Dedicated bastions provide clear audit trails.</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>⚙️ Operational & Technical Reasons</h4>
+      <ul>
+        <li><strong>HAProxy Load Balancing:</strong> OpenShift HA clusters require a load balancer for API (6443) and ingress (80/443) traffic. Corporate load balancers may not support the specific configurations needed, or may have lengthy approval processes.</li>
+        <li><strong>Day 2 Operations:</strong> Adding worker nodes requires updating DHCP reservations, DNS entries, HAProxy backends, and serving new ignition files. A dedicated bastion allows these changes without corporate change control delays.</li>
+        <li><strong>Rapid Iteration:</strong> During installation and troubleshooting, you may need to modify configurations multiple times. A dedicated bastion allows immediate changes without affecting other systems.</li>
+        <li><strong>Version-Specific Requirements:</strong> Different OpenShift versions may require different service configurations. A dedicated bastion can be tailored to each cluster's version.</li>
+        <li><strong>PowerVM-Specific Tools:</strong> The bastion often runs PowerVM-specific tools (lpar_netboot, HMC integration scripts) that don't belong on corporate infrastructure.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🏢 Why Corporate Infrastructure Falls Short</h2>
+    
+    <h3>Corporate DNS</h3>
+    <ul>
+      <li>❌ Change requests take days/weeks</li>
+      <li>❌ May not support wildcard entries (*.apps.cluster.domain)</li>
+      <li>❌ Doesn't provide cluster-specific views</li>
+      <li>❌ Can't easily be rolled back if cluster is destroyed</li>
+    </ul>
+    
+    <h3>Corporate DHCP</h3>
+    <ul>
+      <li>❌ Doesn't support complex PXE boot chains for PowerVM</li>
+      <li>❌ Can't deliver cluster-specific boot parameters</li>
+      <li>❌ May not support MAC-based reservations for dynamic clusters</li>
+      <li>❌ Lacks integration with TFTP for netboot</li>
+    </ul>
+    
+    <h3>Corporate Web Servers</h3>
+    <ul>
+      <li>❌ May not allow hosting of large binary files (RHCOS images)</li>
+      <li>❌ Lack the specific directory structure OpenShift expects</li>
+      <li>❌ Don't provide the low-latency access needed during boot</li>
+      <li>❌ May have security policies preventing ignition file hosting</li>
+    </ul>
+    
+    <h3>Corporate Load Balancers</h3>
+    <ul>
+      <li>❌ Expensive and require lengthy approval processes</li>
+      <li>❌ May not support the specific TCP passthrough needed</li>
+      <li>❌ Can't be easily reconfigured for Day 2 operations</li>
+      <li>❌ Overkill for dev/test clusters</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>💡 The Bastion as a "Cluster Appliance"</h2>
+    <p>Think of the bastion as an integral part of the OpenShift cluster, not separate infrastructure:</p>
+    <ul>
+      <li>✅ <strong>Lifecycle Tied to Cluster:</strong> Created with the cluster, destroyed with the cluster</li>
+      <li>✅ <strong>Self-Contained:</strong> All cluster-specific services in one place</li>
+      <li>✅ <strong>Portable:</strong> Can be backed up, cloned, or moved with the cluster</li>
+      <li>✅ <strong>Minimal Resources:</strong> Only 2 vCPU, 8GB RAM, 50GB storage - negligible overhead</li>
+      <li>✅ <strong>Automation-Friendly:</strong> Can be fully automated with Ansible/Terraform</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>🔄 Hybrid Approach: When to Use Existing Infrastructure</h2>
+    <p>You CAN leverage existing infrastructure for some services:</p>
+    <ul>
+      <li>✅ <strong>Upstream DNS:</strong> Bastion's dnsmasq can forward to corporate DNS for external resolution</li>
+      <li>✅ <strong>NTP/Chrony:</strong> Bastion can sync time from corporate NTP servers</li>
+      <li>✅ <strong>Proxy Servers:</strong> Bastion can route through corporate proxies for internet access</li>
+      <li>✅ <strong>Monitoring:</strong> Bastion metrics can be sent to corporate monitoring systems</li>
+      <li>✅ <strong>Backup:</strong> Bastion can use corporate backup infrastructure</li>
+    </ul>
+    <p><strong>Key Principle:</strong> Use corporate infrastructure for <em>upstream services</em>, but keep cluster-specific services on the bastion.</p>
+  </div>
+
+  <div class="section">
+    <h2>🔍 DNS in x86 vs PowerVM: Why the Difference?</h2>
+    <p><strong>Great question!</strong> In x86 architectures (VMware, AWS, Azure, bare metal), DNS is often handled differently. Here's why:</p>
+    
+    <h3>x86/Cloud Platforms - Automated DNS Integration:</h3>
+    <div class="info-box">
+      <h4>IPI (Installer-Provisioned Infrastructure):</h4>
+      <ul>
+        <li>✅ OpenShift installer creates cloud resources (VMs, load balancers, DNS records) automatically</li>
+        <li>✅ Cloud providers (AWS Route53, Azure DNS, GCP Cloud DNS) have APIs for dynamic DNS management</li>
+        <li>✅ Installer creates DNS records via API calls during installation</li>
+        <li>✅ No manual DNS configuration needed - fully automated</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>UPI (User-Provisioned Infrastructure) on x86:</h4>
+      <ul>
+        <li>⚠️ Still requires DNS entries, but often uses corporate DNS</li>
+        <li>⚠️ Works because x86 installations typically use corporate DHCP/PXE infrastructure</li>
+        <li>⚠️ Corporate DNS teams are more familiar with x86 requirements</li>
+        <li>⚠️ Change management processes are established for x86 clusters</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>Load Balancer Integration:</h4>
+      <ul>
+        <li>✅ Cloud platforms provide managed load balancers (AWS ELB, Azure LB)</li>
+        <li>✅ DNS points to load balancer IPs managed by the cloud provider</li>
+        <li>✅ No need for HAProxy on a bastion</li>
+      </ul>
+    </div>
+    
+    <h3>PowerVM - Why Bastion DNS is Necessary:</h3>
+    <div class="info-box">
+      <h4>No Cloud Provider APIs:</h4>
+      <ul>
+        <li>❌ PowerVM/HMC doesn't have DNS APIs like AWS Route53</li>
+        <li>❌ Can't automate DNS record creation during installation</li>
+        <li>❌ Manual corporate DNS changes would be required for each cluster</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>PXE Boot Complexity:</h4>
+      <ul>
+        <li>❌ PowerVM netboot requires tight integration between DNS, DHCP, and TFTP</li>
+        <li>❌ Corporate DNS may not support the dynamic updates needed during boot</li>
+        <li>❌ Boot process needs immediate DNS resolution - can't wait for DNS propagation</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>No Managed Load Balancers:</h4>
+      <ul>
+        <li>❌ PowerVM doesn't provide managed load balancers like cloud platforms</li>
+        <li>❌ HAProxy on bastion fills this gap</li>
+        <li>❌ DNS entries point to bastion's HAProxy, not cloud LB</li>
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <h4>Cluster Lifecycle:</h4>
+      <ul>
+        <li>❌ Creating/destroying clusters would require DNS team involvement each time</li>
+        <li>❌ Dev/test clusters are created/destroyed frequently - bastion DNS is self-service</li>
+        <li>❌ Corporate DNS changes may take days; bastion DNS changes are immediate</li>
+      </ul>
+    </div>
+    
+    <h3>The Reality: Even x86 Often Uses Bastion-Like Patterns</h3>
+    <ul>
+      <li>🔹 <strong>On-Premises x86:</strong> Many organizations use a "helper node" or "bastion" for UPI installations, similar to PowerVM</li>
+      <li>🔹 <strong>Disconnected Environments:</strong> x86 clusters in air-gapped networks use local DNS/DHCP services</li>
+      <li>🔹 <strong>Edge Deployments:</strong> Single-node OpenShift on x86 often uses local dnsmasq, just like PowerVM SNO</li>
+      <li>🔹 <strong>Development Clusters:</strong> Many x86 dev clusters use local DNS to avoid corporate DNS dependencies</li>
+    </ul>
+    
+    <p style="margin-top: 12px;"><strong>Bottom Line:</strong> The bastion pattern isn't unique to PowerVM - it's a best practice for any environment where you need:</p>
+    <ul>
+      <li>✅ Self-service cluster creation/destruction</li>
+      <li>✅ Independence from corporate infrastructure change management</li>
+      <li>✅ Tight integration between DNS, DHCP, PXE, and load balancing</li>
+      <li>✅ Rapid iteration during development and testing</li>
+    </ul>
+    
+    <p style="margin-top: 12px;"><strong>PowerVM Advantage:</strong> By using a bastion from the start, you get the same self-service capabilities that cloud platforms provide through APIs, but with full control and no cloud provider lock-in.</p>
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    <a href="https://github.com/danijel-soldo/ocp4-ai-power" target="_blank">ocp4-ai-power</a>
+    &nbsp;&middot;&nbsp;
+    OpenShift on PowerVM &nbsp;&middot;&nbsp;
+    <a href="index.html">Documentation Home</a>
+    &nbsp;&middot;&nbsp;
+    <a href="architecture-diagrams.html">Architecture Diagrams</a>
+  </p>
+</footer>
+
+</body>
+</html>
